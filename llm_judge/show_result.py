@@ -36,7 +36,9 @@ def display_result_single(bench_name: str, config_path: str, dump_dir: Optional[
     output_path = os.path.join(Path(judge_dir).parent, filename)
     with open(output_path, "w") as fp:
         for _, row in df_1.iterrows():
-            fp.write(json.dumps(row.to_dict(), ensure_ascii=False) + "\n")
+            data = row.to_dict()
+            data.update(dict(zip(["model", "turn"], row.name)))
+            fp.write(json.dumps(data, ensure_ascii=False) + "\n")
 
     if bench_name.startswith("mt_bench"):
         with open(output_path, "a") as fp:
@@ -44,13 +46,17 @@ def display_result_single(bench_name: str, config_path: str, dump_dir: Optional[
             df_2 = df[df["turn"] == 2].groupby(["model", "turn"]).mean()
             print(df_2.sort_values(by="score", ascending=False))
             for _, row in df_2.iterrows():
-                fp.write(json.dumps(row.to_dict(), ensure_ascii=False) + "\n")
+                data = row.to_dict()
+                data.update(dict(zip(["model", "turn"], row.name)))
+                fp.write(json.dumps(data, ensure_ascii=False) + "\n")
 
             print("\n########## Average ##########")
             df_3 = df[["model", "score"]].groupby(["model"]).mean()
             print(df_3.sort_values(by="score", ascending=False))
             for _, row in df_3.iterrows():
-                fp.write(json.dumps(row.to_dict(), ensure_ascii=False) + "\n")
+                data = row.to_dict()
+                data.update(dict(zip(["model", "turn"], row.name)))
+                fp.write(json.dumps(data, ensure_ascii=False) + "\n")
 
 
 def main():
