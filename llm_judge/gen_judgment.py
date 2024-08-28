@@ -168,8 +168,8 @@ def run_judge(bench_name: str, dump_dir: Optional[str], config_path: str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--bench-name", type=str, default="mt_bench_en", help="The name of the benchmark question set.")
-    parser.add_argument("--dump-dir", type=str, default=None, help="Directory for dumps.")
-    parser.add_argument("--config", type=str, required=True, help="Path to config.")
+    parser.add_argument("--bench-name", "-bench", type=str, default="mt_bench_en")
+    parser.add_argument("--dump-dir", "-dump", type=str, default=None)
+    parser.add_argument("--config", "-cfg", type=str, required=True)
     args = parser.parse_args()
     run_judge(args.bench_name, args.dump_dir, args.config)

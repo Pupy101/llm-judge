@@ -88,7 +88,7 @@ def clean(infile: str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--infile", type=str)
+    parser.add_argument("--infile", "-i", type=str)
     args = parser.parse_args()
 
     clean(args.infile)

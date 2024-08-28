@@ -9,12 +9,14 @@ import pandas as pd
 from llm_judge.common import load_yaml
 
 
-def display_result_single(bench_name: str, config_path: str, judge_dir: Optional[str]):
+def display_result_single(bench_name: str, config_path: str, dump_dir: Optional[str]):
     config = load_yaml(config_path)
     judge_model_config = config["openai"]
     judge_model = judge_model_config["model"]
-    if judge_dir is None:
+    if dump_dir is None:
         judge_dir = f"data/{bench_name}/model_judgment"
+    else:
+        judge_dir = f"{dump_dir}/{bench_name}/model_judgment"
     input_file = os.path.join(judge_dir, f"{judge_model}_single.jsonl")
 
     print(f"Input file: {input_file}")
@@ -32,12 +34,12 @@ def display_result_single(bench_name: str, config_path: str, judge_dir: Optional
 
     filename = "|".join(model_list) + ".jsonl"
     output_path = os.path.join(Path(judge_dir).parent, filename)
-    with open(os.path.join(judge_dir, filename), "w") as fp:
+    with open(output_path, "w") as fp:
         for _, row in df_1.iterrows():
             fp.write(json.dumps(row.to_dict(), ensure_ascii=False) + "\n")
 
     if bench_name.startswith("mt_bench"):
-        with open(os.path.join(judge_dir, filename), "a") as fp:
+        with open(output_path, "a") as fp:
             print("\n########## Second turn ##########")
             df_2 = df[df["turn"] == 2].groupby(["model", "turn"]).mean()
             print(df_2.sort_values(by="score", ascending=False))
@@ -53,9 +55,9 @@ def display_result_single(bench_name: str, config_path: str, judge_dir: Optional
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--bench-name", type=str, default="mt_bench_en")
-    parser.add_argument("--config", type=str, required=True)
-    parser.add_argument("--judge-dir", type=str, default=None)
+    parser.add_argument("--bench-name", "-bench", type=str, default="mt_bench_en")
+    parser.add_argument("--config", "-cfg", type=str, required=True)
+    parser.add_argument("--dump-dir", "-dump", type=str, default=None)
     args = parser.parse_args()
 
-    display_result_single(args.bench_name, args.config, args.judge_dir)
+    display_result_single(args.bench_name, args.config, args.dump_dir)
