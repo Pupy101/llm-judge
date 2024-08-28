@@ -99,4 +99,4 @@ def main():
     parser.add_argument("--config", type=str, required=True)
     args = parser.parse_args()
 
-    run_bench(args.bench_name, args.answer_file, args.config)
+    run_bench(args.bench_name, args.dump_dir, args.config)
