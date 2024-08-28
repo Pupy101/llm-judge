@@ -38,6 +38,7 @@ setup(
             "data/mt_bench_en/reference_answer/*.jsonl",
             "data/mt_bench_ru/*.jsonl",
             "data/mt_bench_ru/reference_answer/*.jsonl",
+            "data/*.jsonl",
         ]
     },
 )
