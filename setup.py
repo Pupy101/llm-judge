@@ -17,7 +17,7 @@ def find_requirements() -> List[str]:
 
 setup(
     name="llm_judge",
-    version="0.1",
+    version="0.0.1",
     description="llm judge",
     author="Sergei Porkhun",
     author_email="ser.porkhun41@gmail.com",
