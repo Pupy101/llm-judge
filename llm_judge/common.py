@@ -6,6 +6,7 @@ import os
 import re
 import time
 from copy import deepcopy
+from pathlib import Path
 from typing import Optional
 
 import yaml
@@ -15,6 +16,7 @@ from shooters.types import DevicesConfig, Message, OpenAIConfig
 
 from llm_judge.model_adapter import get_conversation_template
 
+QUERY_DIR = Path(__file__).parent / "data"
 GIGACHAT: Optional[DevicesThreadShooter] = None
 OPENAI: Optional[OpenAIThreadShooter] = None
 
@@ -305,96 +307,6 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, config, mult
         raise ValueError(f"invalid output format: {judge.prompt_template['output_format']}")
 
     return winner, user_prompt, judgment
-
-
-def play_a_match_pair(match: MatchPair, config, output_file: str):
-    question, model_1, model_2, answer_1, answer_2, judge, ref_answer, multi_turn = (
-        match.question,
-        match.model_1,
-        match.model_2,
-        match.answer_1,
-        match.answer_2,
-        match.judge,
-        match.ref_answer,
-        match.multi_turn,
-    )
-
-    if judge.prompt_template["type"] == "pairwise":
-        g1_winner, g1_user_prompt, g1_judgment = run_judge_pair(
-            question, answer_1, answer_2, judge, ref_answer, config, multi_turn=multi_turn
-        )
-        g2_winner, g2_user_prompt, g2_judgment = run_judge_pair(
-            question, answer_2, answer_1, judge, ref_answer, config, multi_turn=multi_turn
-        )
-
-        g1_map = {"A": "model_1", "B": "model_2"}
-        g2_map = {"A": "model_2", "B": "model_1"}
-        g1_winner = g1_map.get(g1_winner, g1_winner)
-        g2_winner = g2_map.get(g2_winner, g2_winner)
-        question_id = question["question_id"]
-        turn = 1 if not multi_turn else 2
-
-        result = {
-            "question_id": question_id,
-            "model_1": model_1,
-            "model_2": model_2,
-            "g1_winner": g1_winner,
-            "g2_winner": g2_winner,
-            "judge": (judge.model_name, judge.prompt_template["name"]),
-            "g1_user_prompt": g1_user_prompt,
-            "g1_judgment": g1_judgment,
-            "g2_user_prompt": g2_user_prompt,
-            "g2_judgment": g2_judgment,
-            "turn": turn,
-            "tstamp": time.time(),
-        }
-
-        print(
-            f"question: {question_id}, turn: {turn}, model_1: {model_1}, model_2: {model_2}, "
-            f"g1_winner: {g1_winner}, g2_winner: {g2_winner}, "
-            f"judge: {(judge.model_name, judge.prompt_template['name'])}"
-        )
-    elif judge.prompt_template["type"] == "single":
-        m1_score, m1_user_prompt, m1_judgment = run_judge_single(question, answer_1, judge, ref_answer, config)
-        m2_score, m2_user_prompt, m2_judgment = run_judge_single(question, answer_2, judge, ref_answer, config)
-
-        if abs(m1_score - m2_score) <= TIE_DELTA:
-            winner = "tie"
-        elif m1_score > m2_score:
-            winner = "model_1"
-        else:
-            winner = "model_2"
-
-        question_id = question["question_id"]
-        result = {
-            "question_id": question_id,
-            "model_1": model_1,
-            "model_2": model_2,
-            "g1_winner": winner,
-            "g2_winner": winner,
-            "judge": (judge.model_name, judge.prompt_template["name"]),
-            "g1_user_prompt": m1_user_prompt,
-            "g1_judgment": m1_judgment,
-            "g2_user_prompt": m2_user_prompt,
-            "g2_judgment": m2_judgment,
-            "m1_score": m1_score,
-            "m2_score": m2_score,
-            "tstamp": time.time(),
-        }
-        print(
-            f"question: {question_id}, model_1: {model_1}, model_2: {model_2}, "
-            f"winner: {winner}, m1_score: {m1_score}, m2_score: {m2_score}, "
-            f"judge: {(judge.model_name, judge.prompt_template['name'])}"
-        )
-    else:
-        raise ValueError(f"invalid judge type: {judge['type']}")
-
-    if output_file:
-        os.makedirs(os.path.dirname(output_file), exist_ok=True)
-        with open(output_file, "a") as fout:
-            fout.write(json.dumps(result) + "\n")
-
-    return result
 
 
 def chat_completion_openai(conv, temperature, config):

@@ -28,6 +28,7 @@ setup(
             "clean_judgment=llm_judge.clean_judgment:main",
             "download_pregenerated=llm_judge.download:main",
             "gen_api_answer=llm_judge.gen_api_answer:main",
+            "gen_judgment=llm_judge.gen_judgment:main",
         ],
     },
 )

@@ -1,18 +1,25 @@
 import argparse
 import concurrent.futures
 import json
+import logging
 import os
 import time
-from pathlib import Path
 from typing import Optional
 
 import shortuuid
 import tqdm
 
-from llm_judge.common import chat_completion_giga, load_questions, load_yaml, reorg_answer_file, temperature_config
+from llm_judge.common import (
+    QUERY_DIR,
+    chat_completion_giga,
+    load_questions,
+    load_yaml,
+    reorg_answer_file,
+    temperature_config,
+)
 from llm_judge.model_adapter import get_conversation_template
 
-QUERY_DIR = Path(__file__).parent / "data"
+logging.basicConfig(filename="gen_api.log", filemode="w", level=logging.DEBUG)
 
 
 def get_answer(question: dict, model: str, config: dict, answer_file: str):
