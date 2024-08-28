@@ -34,10 +34,10 @@ setup(
     },
     package_data={
         "llm_judge": [
-            "llm_judge/data/mt_bench_en/*.jsonl",
-            "llm_judge/data/mt_bench_en/reference_answer/*.jsonl",
-            "llm_judge/data/mt_bench_ru/*.jsonl",
-            "llm_judge/data/mt_bench_ru/reference_answer/*.jsonl",
+            "data/mt_bench_en/*.jsonl",
+            "data/mt_bench_en/reference_answer/*.jsonl",
+            "data/mt_bench_ru/*.jsonl",
+            "data/mt_bench_ru/reference_answer/*.jsonl",
         ]
     },
 )
