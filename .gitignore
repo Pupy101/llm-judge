@@ -1,0 +1,12 @@
+.idea/
+.vscode/
+.mypy_cache/
+.notebooks/
+.pytest_cache/
+.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+.env
+*.log
+*.egg-info
+**/logs/

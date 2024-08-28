@@ -1,0 +1,1 @@
+fschat@git+https://github.com/lm-sys/FastChat#egg=7850a26a289b05cb23577981c5af579d44b94daa"[llm_judge]"

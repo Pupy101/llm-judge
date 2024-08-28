@@ -1,0 +1,22 @@
+devices:
+  model: &model_name <model>
+  rpm: 100
+  tpm: 10000
+  need_auth: false
+  params:
+    temperature: null
+    top_p: null
+    max_tokens: 1024
+    repetition_penalty: null
+    profanity_check: false
+  api:
+    base_url: http://0.0.0.0:8081
+    route_chat: /chat
+
+openai:
+  ...
+
+compare:
+  - *model_name
+
+parallel: 10
