@@ -57,7 +57,7 @@ def get_answer(question: dict, model: str, config: dict, answer_file: str):
         fout.write(json.dumps(ans) + "\n")
 
 
-def run_bench(bench_name: str, answer_file: Optional[str], config_path: str):
+def run_bench(bench_name: str, dump_dir: Optional[str], config_path: str):
     config = load_yaml(config_path)
     question_file = str(QUERY_DIR / f"{bench_name}/question.jsonl")
     questions = load_questions(question_file, None, None)
@@ -69,8 +69,10 @@ def run_bench(bench_name: str, answer_file: Optional[str], config_path: str):
     model = config["devices"]["model"]
     assert isinstance(model, str), model
 
-    if answer_file is None:
+    if dump_dir is None:
         answer_file = f"data/{bench_name}/model_answer/{model}.jsonl"
+    else:
+        answer_file = f"{dump_dir}/{bench_name}/model_answer/{model}.jsonl"
     print(f"Output to {answer_file}")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=parallel) as executor:
