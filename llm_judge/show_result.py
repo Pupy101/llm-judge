@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+from pathlib import Path
 from typing import Optional
 
 import pandas as pd
@@ -30,6 +31,7 @@ def display_result_single(bench_name: str, config_path: str, judge_dir: Optional
     print(df_1.sort_values(by="score", ascending=False))
 
     filename = "|".join(model_list) + ".jsonl"
+    output_path = os.path.join(Path(judge_dir).parent, filename)
     with open(os.path.join(judge_dir, filename), "w") as fp:
         for _, row in df_1.iterrows():
             fp.write(json.dumps(row.to_dict(), ensure_ascii=False) + "\n")

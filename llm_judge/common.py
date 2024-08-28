@@ -236,7 +236,7 @@ def play_a_match_single(match: MatchSingle, config, output_file: str):
         raise ValueError(f"invalid judge type: {judge['type']}")
 
     if output_file:
-        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        os.makedirs(Path(output_file).parent, exist_ok=True)
         with open(output_file, "a") as fout:
             fout.write(json.dumps(result) + "\n")
 

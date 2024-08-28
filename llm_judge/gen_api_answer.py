@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import time
+from pathlib import Path
 from typing import Optional
 
 import shortuuid
@@ -51,7 +52,7 @@ def get_answer(question: dict, model: str, config: dict, answer_file: str):
         "tstamp": time.time(),
     }
 
-    os.makedirs(os.path.dirname(answer_file), exist_ok=True)
+    os.makedirs(Path(answer_file).parent, exist_ok=True)
     with open(answer_file, "a") as fout:
         fout.write(json.dumps(ans) + "\n")
 

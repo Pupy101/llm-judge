@@ -4,6 +4,7 @@ Download the pre-generated model answers and judgments for MT-bench.
 
 import argparse
 import os
+from pathlib import Path
 
 from fastchat.utils import run_cmd
 
@@ -49,7 +50,7 @@ def download(dump_dir: str = "."):
 
     for name in filenames:
         path = os.path.join(dump_dir, name).replace("data/mt_bench/", "data/mt_bench_en/")
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        os.makedirs(Path(path).parent, exist_ok=True)
         ret = run_cmd(f"wget -q --show-progress -O {path} {prefix + name}")
         assert ret == 0
 
