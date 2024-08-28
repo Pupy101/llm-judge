@@ -55,7 +55,7 @@ def display_result_single(bench_name: str, config_path: str, dump_dir: Optional[
             print(df_3.sort_values(by="score", ascending=False))
             for _, row in df_3.iterrows():
                 data = row.to_dict()
-                data.update(dict(zip(["model", "turn"], row.name)))
+                data.update(dict(zip(["model", "turn"], list(row.name) + ["overall"])))
                 fp.write(json.dumps(data, ensure_ascii=False) + "\n")
 
 
