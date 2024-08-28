@@ -29,6 +29,7 @@ setup(
             "download_pregenerated=llm_judge.download:main",
             "gen_api_answer=llm_judge.gen_api_answer:main",
             "gen_judgment=llm_judge.gen_judgment:main",
+            "show_result=llm_judge.show_result:main",
         ],
     },
 )
