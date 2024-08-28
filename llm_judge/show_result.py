@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 from typing import Optional
 
@@ -28,14 +29,24 @@ def display_result_single(bench_name: str, config_path: str, judge_dir: Optional
     df_1 = df[df["turn"] == 1].groupby(["model", "turn"]).mean()
     print(df_1.sort_values(by="score", ascending=False))
 
-    if bench_name.startswith("mt_bench"):
-        print("\n########## Second turn ##########")
-        df_2 = df[df["turn"] == 2].groupby(["model", "turn"]).mean()
-        print(df_2.sort_values(by="score", ascending=False))
+    filename = "|".join(model_list) + ".jsonl"
+    with open(os.path.join(judge_dir, filename), "w") as fp:
+        for _, row in df_1.iterrows():
+            fp.write(json.dumps(row.to_dict(), ensure_ascii=False) + "\n")
 
-        print("\n########## Average ##########")
-        df_3 = df[["model", "score"]].groupby(["model"]).mean()
-        print(df_3.sort_values(by="score", ascending=False))
+    if bench_name.startswith("mt_bench"):
+        with open(os.path.join(judge_dir, filename), "a") as fp:
+            print("\n########## Second turn ##########")
+            df_2 = df[df["turn"] == 2].groupby(["model", "turn"]).mean()
+            print(df_2.sort_values(by="score", ascending=False))
+            for _, row in df_2.iterrows():
+                fp.write(json.dumps(row.to_dict(), ensure_ascii=False) + "\n")
+
+            print("\n########## Average ##########")
+            df_3 = df[["model", "score"]].groupby(["model"]).mean()
+            print(df_3.sort_values(by="score", ascending=False))
+            for _, row in df_3.iterrows():
+                fp.write(json.dumps(row.to_dict(), ensure_ascii=False) + "\n")
 
 
 def main():
