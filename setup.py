@@ -32,5 +32,5 @@ setup(
             "show_result=llm_judge.show_result:main",
         ],
     },
-    package_data={"llm_judge": ["*.jsonl"]},
+    include_package_data=True,
 )
