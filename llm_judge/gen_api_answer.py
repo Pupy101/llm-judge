@@ -89,12 +89,7 @@ def run_bench(bench_name: str, dump_dir: Optional[str], config_path: str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--bench-name",
-        type=str,
-        default="mt_bench_en",
-        help="The name of the benchmark question set.",
-    )
+    parser.add_argument("--bench-name", type=str, default="mt_bench_en", help="The name of the benchmark question set.")
     parser.add_argument("--dump-dir", type=str, default=None, help="The output dump dir.")
     parser.add_argument("--config", type=str, required=True)
     args = parser.parse_args()

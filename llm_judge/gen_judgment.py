@@ -91,12 +91,14 @@ def make_judge_single(judge_model, judge_prompts):
     return judges
 
 
-def run_judge(bench_name: str, answer_dir: Optional[str], output_file: Optional[str], config_path: str):
+def run_judge(bench_name: str, dump_dir: Optional[str], config_path: str):
     question_file = QUERY_DIR / f"{bench_name}/question.jsonl"
     judge_file = QUERY_DIR / "judge_prompts.jsonl"
 
-    if answer_dir is None:
+    if dump_dir is None:
         answer_dir = f"data/{bench_name}/model_answer"
+    else:
+        answer_dir = f"{dump_dir}/{bench_name}/model_answer"
     ref_answer_dir = QUERY_DIR / f"{bench_name}/reference_answer"
 
     questions = load_questions(question_file, None, None)
@@ -110,8 +112,10 @@ def run_judge(bench_name: str, answer_dir: Optional[str], output_file: Optional[
     judge_model = judge_config["model"]
     parallel = config["parallel"]
 
-    if output_file is None:
+    if dump_dir is None:
         output_file = f"data/{bench_name}/model_judgment/{judge_model}_single.jsonl"
+    else:
+        output_file = f"{dump_dir}/{bench_name}/model_judgment/{judge_model}_single.jsonl"
     judges = make_judge_single(judge_model, judge_prompts)
     baseline_model = None
 
@@ -165,8 +169,7 @@ def run_judge(bench_name: str, answer_dir: Optional[str], output_file: Optional[
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--bench-name", type=str, default="mt_bench_en", help="The name of the benchmark question set.")
-    parser.add_argument("--answer-dir", type=str, default=None, help="Directory with model answers.")
-    parser.add_argument("--output-file", type=str, default=None, help="Name of output file.")
+    parser.add_argument("--dump-dir", type=str, default=None, help="Directory for dumps.")
     parser.add_argument("--config", type=str, required=True, help="Path to config.")
     args = parser.parse_args()
-    run_judge(args.bench_name, args.answer_dir, args.output_file, args.config)
+    run_judge(args.bench_name, args.dump_dir, args.config)
