@@ -95,7 +95,7 @@ def main():
         default="mt_bench_en",
         help="The name of the benchmark question set.",
     )
-    parser.add_argument("--answer-file", type=str, default=None, help="The output answer file.")
+    parser.add_argument("--dump-dir", type=str, default=None, help="The output dump dir.")
     parser.add_argument("--config", type=str, required=True)
     args = parser.parse_args()
 
