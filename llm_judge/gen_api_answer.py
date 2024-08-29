@@ -20,8 +20,6 @@ from llm_judge.common import (
 )
 from llm_judge.model_adapter import get_conversation_template
 
-logging.basicConfig(filename="gen_api.log", filemode="w", level=logging.DEBUG)
-
 
 def get_answer(question: dict, model: str, config: dict, answer_file: str):
     if "required_temperature" in question.keys():
@@ -88,10 +86,13 @@ def run_bench(bench_name: str, dump_dir: Optional[str], config_path: str):
 
 
 def main():
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--bench-name", "-bench", type=str, default="mt_bench_en")
     parser.add_argument("--dump-dir", "-dump", type=str, default=None)
     parser.add_argument("--config", "-cfg", type=str, required=True)
     args = parser.parse_args()
+
+    logging.basicConfig(filename="gen_api.log", filemode="w", level=logging.DEBUG)
 
     run_bench(args.bench_name, args.dump_dir, args.config)

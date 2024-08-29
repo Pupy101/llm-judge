@@ -10,15 +10,16 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
-from shooters.devices import DevicesThreadShooter
-from shooters.openai import OpenAIThreadShooter
+from shooters.core.utils import sync_retry_supress
+from shooters.devices import sync_chat_completion as giga_sync_chat_completion
+from shooters.devices import sync_token as giga_sync_token
+from shooters.openai import sync_chat_completion as openai_sync_chat_completion
 from shooters.types import DevicesConfig, Message, OpenAIConfig
 
 from llm_judge.model_adapter import get_conversation_template
 
 QUERY_DIR = Path(__file__).parent / "data"
-GIGACHAT: Optional[DevicesThreadShooter] = None
-OPENAI: Optional[OpenAIThreadShooter] = None
+GIGACHAT_TOKEN: Optional[str] = None
 
 # API setting constants
 API_MAX_RETRY = 16
@@ -310,18 +311,27 @@ def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, config, mult
 
 
 def chat_completion_openai(conv, temperature, config):
-    global OPENAI
-    if OPENAI is None:
-        config_: dict = deepcopy(config)
-        config_.update({"params": {"temperature": temperature}, "tqdm_off": True})
-        OPENAI = OpenAIThreadShooter(OpenAIConfig.model_validate(config_))
+    config_: dict = deepcopy(config)
+    params = config_.get("params")
+    if params and isinstance(params, dict):
+        params.update({"temperature": temperature})
+    cfg = OpenAIConfig.model_validate(config_)
 
+    assert cfg.api_tokens and len(cfg.api_tokens) == 1
+    api_key = cfg.api_tokens[0]
     output = API_ERROR_OUTPUT
     for _ in range(API_MAX_RETRY):
         try:
             messages = conv.to_openai_api_messages()
-            responses = OPENAI.shoot([[Message.model_validate(_) for _ in messages]])
-            output = responses[0].choices[0].message.content
+            response = openai_sync_chat_completion(
+                model=cfg.model,
+                api_key=api_key,
+                params=cfg.params,
+                messages=[Message.model_validate(_) for _ in messages],
+                base_url=cfg.api.base_url,
+                route_chat=cfg.api.route_chat,
+            )
+            output = response.choices[0].message.content
             break
         except Exception as e:
             print(type(e), e)
@@ -331,18 +341,41 @@ def chat_completion_openai(conv, temperature, config):
 
 
 def chat_completion_giga(conv, temperature, config):
-    global GIGACHAT
-    if GIGACHAT is None:
-        config_: dict = deepcopy(config)
-        config_.update({"params": {"temperature": temperature}, "tqdm_off": True})
-        GIGACHAT = DevicesThreadShooter(DevicesConfig.model_validate(config_))
+    global GIGACHAT_TOKEN
+    config_: dict = deepcopy(config)
+    params = config_.get("params")
+    if params and isinstance(params, dict):
+        params.update({"temperature": temperature})
+    cfg = DevicesConfig.model_validate(config_)
+
+    if GIGACHAT_TOKEN is None and cfg.need_auth:
+
+        @sync_retry_supress
+        def token_request() -> str:
+            response = giga_sync_token(
+                credentials=cfg.credentials,
+                scope=cfg.scope,
+                auth_url=cfg.api.auth_url,
+                request_id=cfg.api.request_id,
+            )
+            return response.access_token
+
+        GIGACHAT_TOKEN = token_request()
+        assert GIGACHAT_TOKEN is not None, "Can't get auth token"
 
     output = API_ERROR_OUTPUT
     for _ in range(API_MAX_RETRY):
         try:
             messages = conv.to_openai_api_messages()
-            responses = GIGACHAT.shoot([[Message.model_validate(_) for _ in messages]])
-            output = responses[0].choices[0].message.content
+            response = giga_sync_chat_completion(
+                model=cfg.model,
+                token=GIGACHAT_TOKEN,
+                params=cfg.params,
+                messages=[Message.model_validate(_) for _ in messages],
+                base_url=cfg.api.base_url,
+                route_chat=cfg.api.route_chat,
+            )
+            output = response.choices[0].message.content
             break
         except Exception as e:
             print(type(e), e)

@@ -21,8 +21,6 @@ from llm_judge.common import (
     play_a_match_single,
 )
 
-logging.basicConfig(filename="gen_judgment.log", filemode="w", level=logging.DEBUG)
-
 
 def make_match(questions, models, model_answers, judge, baseline_model, ref_answers=None, multi_turn=False):
     matches = []
@@ -172,4 +170,5 @@ def main():
     parser.add_argument("--dump-dir", "-dump", type=str, default=None)
     parser.add_argument("--config", "-cfg", type=str, required=True)
     args = parser.parse_args()
+    logging.basicConfig(filename="gen_judgment.log", filemode="w", level=logging.DEBUG)
     run_judge(args.bench_name, args.dump_dir, args.config)
