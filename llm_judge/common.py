@@ -317,7 +317,7 @@ def chat_completion_openai(conv, temperature, config):
         params.update({"temperature": temperature})
     cfg = OpenAIConfig.model_validate(config_)
 
-    assert cfg.api_tokens and len(cfg.api_tokens) == 1, cfg.api_tokens
+    assert cfg.api_tokens
     api_key = cfg.api_tokens[0]
     output = API_ERROR_OUTPUT
     for _ in range(API_MAX_RETRY):
