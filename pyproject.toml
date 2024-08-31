@@ -5,11 +5,15 @@ ignore_missing_imports = true
 [tool.pylint]
 max-line-length = 120
 disable = [
+    "anomalous-backslash-in-string",
+    "missing-function-docstring",
     "missing-module-docstring",
     "missing-class-docstring",
-    "missing-function-docstring",
-    "duplicate-code",
+    "broad-exception-caught",
     "unspecified-encoding",
+    "global-statement",
+    "too-many-locals",
+    "duplicate-code",
     "no-member",
     "fixme",
 ]

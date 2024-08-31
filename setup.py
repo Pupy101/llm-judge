@@ -25,20 +25,20 @@ setup(
     install_requires=find_requirements(),
     entry_points={
         "console_scripts": [
-            "clean_judgment=llm_judge.clean_judgment:main",
-            "download_pregenerated=llm_judge.download:main",
-            "gen_api_answer=llm_judge.gen_api_answer:main",
-            "gen_judgment=llm_judge.gen_judgment:main",
-            "show_result=llm_judge.show_result:main",
+            "mt_bench_clean_judgment=llm_judge.mt_bench.clean_judgment:main",
+            "mt_bench_download_pregenerated=llm_judge.mt_bench.download:main",
+            "mt_bench_gen_api_answer=llm_judge.mt_bench.gen_api_answer:main",
+            "mt_bench_gen_judgment=llm_judge.mt_bench.gen_judgment:main",
+            "mt_bench_show_result=llm_judge.mt_bench.show_result:main",
         ],
     },
     package_data={
         "llm_judge": [
-            "data/mt_bench_en/*.jsonl",
-            "data/mt_bench_en/reference_answer/*.jsonl",
-            "data/mt_bench_ru/*.jsonl",
-            "data/mt_bench_ru/reference_answer/*.jsonl",
-            "data/*.jsonl",
+            "mt_bench/data/mt_bench_en/*.jsonl",
+            "mt_bench/data/mt_bench_en/reference_answer/*.jsonl",
+            "mt_bench/data/mt_bench_ru/*.jsonl",
+            "mt_bench/data/mt_bench_ru/reference_answer/*.jsonl",
+            "mt_bench/data/*.jsonl",
         ]
     },
 )

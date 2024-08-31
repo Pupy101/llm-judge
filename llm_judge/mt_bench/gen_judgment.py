@@ -1,19 +1,20 @@
 import argparse
 import json
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
 import numpy as np
 from tqdm import tqdm
 
-from llm_judge.common import (
+from llm_judge.mt_bench.common import (
     NEED_REF_CATS,
     QUERY_DIR,
     Judge,
-    MatchPair,
     MatchSingle,
     check_data,
+    load_jsonl,
     load_judge_prompts,
     load_model_answers,
     load_questions,
@@ -22,36 +23,13 @@ from llm_judge.common import (
 )
 
 
-def make_match(questions, models, model_answers, judge, baseline_model, ref_answers=None, multi_turn=False):
+def make_match_single(questions, models, model_answers, judge, ref_answers=None, multi_turn=False):
     matches = []
     for q in questions:
         if multi_turn and len(q["turns"]) != 2:
             continue
-        for i in range(len(models)):
+        for m in models:
             q_id = q["question_id"]
-            m_1 = models[i]
-            m_2 = baseline_model
-            if m_1 == m_2:
-                continue
-            a_1 = model_answers[m_1][q_id]
-            a_2 = model_answers[baseline_model][q_id]
-            if ref_answers is not None:
-                ref = ref_answers[judge.model_name][q_id]
-                match = MatchPair(dict(q), m_1, m_2, a_1, a_2, judge, ref_answer=ref, multi_turn=multi_turn)
-            else:
-                match = MatchPair(dict(q), m_1, m_2, a_1, a_2, judge, multi_turn=multi_turn)
-            matches.append(match)
-    return matches
-
-
-def make_match_single(questions, models, model_answers, judge, baseline_model=None, ref_answers=None, multi_turn=False):
-    matches = []
-    for q in questions:
-        if multi_turn and len(q["turns"]) != 2:
-            continue
-        for i in range(len(models)):
-            q_id = q["question_id"]
-            m = models[i]
             a = model_answers[m][q_id]
             if ref_answers is not None:
                 ref = ref_answers[judge.model_name][q_id]
@@ -59,20 +37,6 @@ def make_match_single(questions, models, model_answers, judge, baseline_model=No
             else:
                 matches.append(MatchSingle(dict(q), m, a, judge, multi_turn=multi_turn))
     return matches
-
-
-def make_judge_pairwise(judge_model, judge_prompts):
-    judges = {}
-    judges["default"] = Judge(judge_model, judge_prompts["pair-v2"])
-    judges["math"] = Judge(judge_model, judge_prompts["pair-math-v1"], ref_based=True)
-    judges["default-mt"] = Judge(judge_model, judge_prompts["pair-v2-multi-turn"], multi_turn=True)
-    judges["math-mt"] = Judge(
-        judge_model,
-        judge_prompts["pair-math-v1-multi-turn"],
-        ref_based=True,
-        multi_turn=True,
-    )
-    return judges
 
 
 def make_judge_single(judge_model, judge_prompts):
@@ -89,15 +53,15 @@ def make_judge_single(judge_model, judge_prompts):
     return judges
 
 
-def run_judge(bench_name: str, dump_dir: Optional[str], config_path: str):
-    question_file = QUERY_DIR / f"{bench_name}/question.jsonl"
-    judge_file = QUERY_DIR / "judge_prompts.jsonl"
+def run_judge(bench_name: str, dump_dir: Optional[str], config_path: str, force: bool = False) -> None:
+    question_file = str(QUERY_DIR.absolute() / f"{bench_name}/question.jsonl")
+    judge_file = str(QUERY_DIR.absolute() / "judge_prompts.jsonl")
+    ref_answer_dir = str(QUERY_DIR.absolute() / f"{bench_name}/reference_answer")
 
     if dump_dir is None:
         answer_dir = f"data/{bench_name}/model_answer"
     else:
         answer_dir = f"{dump_dir}/{bench_name}/model_answer"
-    ref_answer_dir = QUERY_DIR / f"{bench_name}/reference_answer"
 
     questions = load_questions(question_file, None, None)
     model_answers = load_model_answers(answer_dir)
@@ -114,6 +78,14 @@ def run_judge(bench_name: str, dump_dir: Optional[str], config_path: str):
         output_file = f"data/{bench_name}/model_judgment/{judge_model}_single.jsonl"
     else:
         output_file = f"{dump_dir}/{bench_name}/model_judgment/{judge_model}_single.jsonl"
+
+    if os.path.exists(output_file) and not force:
+        data_ = load_jsonl(output_file)
+        models_ = {_["model"] for _ in data_}
+        if len(set(models) - models_) == 0:
+            print("In file %s already exists judgment")
+            return
+
     judges = make_judge_single(judge_model, judge_prompts)
     baseline_model = None
 
@@ -124,14 +96,10 @@ def run_judge(bench_name: str, dump_dir: Optional[str], config_path: str):
 
     # Make matches
     matches: list = []
-    matches += make_match_single(question_default, models, model_answers, judges["default"], baseline_model)
-    matches += make_match_single(question_math, models, model_answers, judges["math"], baseline_model, ref_answers)
-    matches += make_match_single(
-        question_default, models, model_answers, judges["default-mt"], baseline_model, multi_turn=True
-    )
-    matches += make_match_single(
-        question_math, models, model_answers, judges["math-mt"], baseline_model, ref_answers, multi_turn=True
-    )
+    matches += make_match_single(question_default, models, model_answers, judges["default"])
+    matches += make_match_single(question_math, models, model_answers, judges["math"], ref_answers)
+    matches += make_match_single(question_default, models, model_answers, judges["default-mt"], multi_turn=True)
+    matches += make_match_single(question_math, models, model_answers, judges["math-mt"], ref_answers, multi_turn=True)
 
     match_stat: dict = {}
     match_stat["bench_name"] = bench_name

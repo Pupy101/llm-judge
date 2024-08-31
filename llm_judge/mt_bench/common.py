@@ -16,7 +16,7 @@ from shooters.devices import sync_token as giga_sync_token
 from shooters.openai import sync_chat_completion as openai_sync_chat_completion
 from shooters.types import DevicesConfig, Message, OpenAIConfig
 
-from llm_judge.model_adapter import get_conversation_template
+from llm_judge.mt_bench.model_adapter import get_conversation_template
 
 QUERY_DIR = Path(__file__).parent / "data"
 GIGACHAT_TOKEN: Optional[str] = None
@@ -74,22 +74,21 @@ class MatchSingle:
     multi_turn: bool = False
 
 
-@dataclasses.dataclass
-class MatchPair:
-    question: dict
-    model_1: str
-    model_2: str
-    answer_1: dict
-    answer_2: dict
-    judge: Judge
-    ref_answer: Optional[dict] = None
-    multi_turn: bool = False
-
-
 def load_yaml(path: str):
     with open(path) as fp:
         config = yaml.safe_load(fp)
     return config
+
+
+def load_jsonl(path: str):
+    data = []
+    with open(path) as fp:
+        for line in fp:
+            line = line.strip()
+            if not line:
+                continue
+            data.append(json.loads(line))
+    return data
 
 
 def reorg_answer_file(answer_file):
@@ -133,7 +132,7 @@ def load_model_answers(answer_dir: str):
         with open(filename) as fin:
             for line in fin:
                 line = json.loads(line)
-                answer[line["question_id"]] = line
+                answer[line["question_id"]] = line  # type: ignore
         model_answers[model_name] = answer
 
     return model_answers
@@ -149,11 +148,13 @@ def load_judge_prompts(prompt_file: str):
     with open(prompt_file) as fin:
         for line in fin:
             line = json.loads(line)
-            prompts[line["name"]] = line
+            prompts[line["name"]] = line  # type: ignore
     return prompts
 
 
-def run_judge_single(question, answer, judge, ref_answer, config, multi_turn=False):
+def run_judge_single(  # pylint: disable=too-many-arguments
+    question, answer, judge, ref_answer, config, multi_turn=False
+):
     kwargs = {}
     model = judge.model_name
     if ref_answer is not None:
@@ -234,7 +235,7 @@ def play_a_match_single(match: MatchSingle, config, output_file: str):
             f"judge: {(judge.model_name, judge.prompt_template['name'])}"
         )
     else:
-        raise ValueError(f"invalid judge type: {judge['type']}")
+        raise ValueError(f"invalid judge type: {judge['type']}")  # type: ignore
 
     if output_file:
         os.makedirs(Path(output_file).parent, exist_ok=True)
@@ -244,74 +245,8 @@ def play_a_match_single(match: MatchSingle, config, output_file: str):
     return result
 
 
-def run_judge_pair(question, answer_a, answer_b, judge, ref_answer, config, multi_turn=False):
-    kwargs = {}
-    model = judge.model_name
-    if ref_answer is not None:
-        kwargs["ref_answer_1"] = ref_answer["choices"][0]["turns"][0]
-        if multi_turn:
-            kwargs["ref_answer_2"] = ref_answer["choices"][0]["turns"][1]
-
-    if multi_turn:
-        system_prompt = judge.prompt_template["system_prompt"]
-        user_prompt = judge.prompt_template["prompt_template"].format(
-            question_1=question["turns"][0],
-            question_2=question["turns"][1],
-            answer_a_1=answer_a["choices"][0]["turns"][0],
-            answer_b_1=answer_b["choices"][0]["turns"][0],
-            answer_a_2=answer_a["choices"][0]["turns"][1],
-            answer_b_2=answer_b["choices"][0]["turns"][1],
-            **kwargs,
-        )
-    else:
-        system_prompt = judge.prompt_template["system_prompt"]
-        user_prompt = judge.prompt_template["prompt_template"].format(
-            question=question["turns"][0],
-            answer_a=answer_a["choices"][0]["turns"][0],
-            answer_b=answer_b["choices"][0]["turns"][0],
-            **kwargs,
-        )
-
-    winner = "error"
-
-    conv = get_conversation_template(model)
-    conv.append_message(conv.roles[0], user_prompt)
-    conv.append_message(conv.roles[1], None)
-
-    conv.set_system_message(system_prompt)
-    judgment = chat_completion_openai(conv, temperature=0, config=config)
-
-    if judge.prompt_template["output_format"] == "[[A]]":
-        if "[[A]]" in judgment:
-            winner = "A"
-        elif "[[B]]" in judgment:
-            winner = "B"
-        elif "[[C]]" in judgment:
-            winner = "tie"
-        else:
-            winner = "error"
-    elif judge.prompt_template["output_format"] == "[[rating_a,rating_b]]":
-        match = re.search(two_score_pattern, judgment)
-        if not match:
-            match = re.search(two_score_pattern_backup, judgment)
-        if match:
-            scores = [ast.literal_eval(s.strip()) for s in match.groups()]
-            if abs(scores[0] - scores[1]) <= TIE_DELTA:
-                winner = "tie"
-            elif scores[0] > scores[1]:
-                winner = "A"
-            else:
-                winner = "B"
-        else:
-            winner = "error"
-    else:
-        raise ValueError(f"invalid output format: {judge.prompt_template['output_format']}")
-
-    return winner, user_prompt, judgment
-
-
 def chat_completion_openai(conv, temperature, config):
-    config_: dict = deepcopy(config)
+    config_: dict = deepcopy(config)  # type: ignore
     params = config_.get("params")
     if params and isinstance(params, dict):
         params.update({"temperature": temperature})
@@ -342,7 +277,7 @@ def chat_completion_openai(conv, temperature, config):
 
 def chat_completion_giga(conv, temperature, config):
     global GIGACHAT_TOKEN
-    config_: dict = deepcopy(config)
+    config_: dict = deepcopy(config)  # type: ignore
     params = config_.get("params")
     if params and isinstance(params, dict):
         params.update({"temperature": temperature})
@@ -407,49 +342,6 @@ def normalize_game_key_dict(judgment_dict):
     return ret
 
 
-def load_pairwise_model_judgments(filename: str):
-    """Load model judgments.
-
-    The return value is a dict of type:
-    Dict[judge: Tuple -> Dict[game_key: tuple -> game_result: dict]
-    """
-    judge_dict: dict = {}
-
-    for line in open(filename):
-        obj = json.loads(line)
-        judge = tuple(obj["judge"])
-        qid, model_1, model_2 = obj["question_id"], obj["model_1"], obj["model_2"]
-
-        if judge not in judge_dict:
-            judge_dict[judge] = {}
-
-        if "winner" in obj:
-            winner = obj["winner"]
-        elif "g1_winner" in obj and "g2_winner" in obj:
-            g1_winner, g2_winner = obj["g1_winner"], obj["g2_winner"]
-            if g1_winner == g2_winner:
-                winner = g1_winner
-            else:
-                winner = "inconsistent"
-        else:
-            raise ValueError(f"Invalid keys: {list(obj.keys())}")
-
-        gamekey = (qid, model_1, model_2)
-        winners = (winner,)
-
-        judge_dict[judge][gamekey] = {
-            "winners": winners,
-            "g1_judgment": obj["g1_judgment"],
-            "g2_judgment": obj["g2_judgment"],
-        }
-
-    # Make the model names sorted in the game keys
-    normalized = {}
-    for judge, value in judge_dict.items():
-        normalized[judge] = normalize_game_key_dict(value)
-    return normalized
-
-
 def load_single_model_judgments(filename: str):
     """Load model judgments.
 
@@ -475,19 +367,6 @@ def load_single_model_judgments(filename: str):
     return judge_dict
 
 
-def resolve_pairwise_judgment_dict(question, model_judgments_normal, model_judgments_math, multi_turn=False):
-    """Return the correct pairwise judge."""
-    if multi_turn:
-        if question["category"] in NEED_REF_CATS:
-            return model_judgments_math[("gpt-4", "pair-math-v1-multi-turn")]
-        return model_judgments_normal[("gpt-4", "pair-v2-multi-turn")]
-
-    if question["category"] in NEED_REF_CATS:
-        return model_judgments_math[("gpt-4", "pair-math-v1")]
-    else:
-        return model_judgments_normal[("gpt-4", "pair-v2")]
-
-
 def resolve_single_judgment_dict(question, model_judgments_normal, model_judgments_math, multi_turn=False):
     """Return the correct single answer grading judge."""
     if multi_turn:
@@ -497,33 +376,7 @@ def resolve_single_judgment_dict(question, model_judgments_normal, model_judgmen
 
     if question["category"] in NEED_REF_CATS:
         return model_judgments_math[("gpt-4", "single-math-v1")]
-    else:
-        return model_judgments_normal[("gpt-4", "single-v1")]
-
-
-def get_pairwise_judge_explanation(gamekey, judgment_dict):
-    """Get model judge explanation."""
-    try:
-        qid, model_1, model_2 = gamekey
-        if model_1 < model_2:
-            res = judgment_dict[gamekey]
-            g1_judgment, g2_judgment = res["g1_judgment"], res["g2_judgment"]
-        else:
-            new_gamekey = (qid, model_2, model_1)
-            res = judgment_dict[new_gamekey]
-
-            model_2, model_1 = model_1, model_2
-            g1_judgment, g2_judgment = res["g2_judgment"], res["g1_judgment"]
-
-        return (
-            f"**Game 1**. **A**: {model_1}, **B**: {model_2}\n\n"
-            f"**Judgment**: {g1_judgment}"
-            + "\n\n`--------------------------`\n\n"
-            + f"**Game 2**. **A**: {model_2}, **B**: {model_1}\n\n"
-            f"**Judgment**: {g2_judgment}"
-        )
-    except KeyError:
-        return "N/A"
+    return model_judgments_normal[("gpt-4", "single-v1")]
 
 
 def get_single_judge_explanation(gamekey, judgment_dict):

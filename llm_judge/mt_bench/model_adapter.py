@@ -10,7 +10,7 @@ class BaseModelAdapter:
 
     use_fast_tokenizer = True
 
-    def match(self, model_path: str):
+    def match(self, model_path: str):  # pylint: disable=unused-argument
         return True
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
@@ -19,7 +19,7 @@ class BaseModelAdapter:
     def load_compress_model(self, model_path, device, torch_dtype, revision="main"):
         raise NotImplementedError
 
-    def get_default_conv_template(self, model_path: str) -> Conversation:
+    def get_default_conv_template(self, model_path: str) -> Conversation:  # pylint: disable=unused-argument
         return get_conv_template("chatgpt")
 
 

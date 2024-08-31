@@ -57,7 +57,7 @@ def clean(infile: str):
             )
         else:  # single
             model = obj["model"]
-            key = (obj["model"], obj["question_id"], tuple(obj["judge"]))
+            key = (obj["model"], obj["question_id"], tuple(obj["judge"]))  # type: ignore
 
         if key in visited:
             continue
@@ -68,7 +68,7 @@ def clean(infile: str):
         models.add(model)
         rets.append(obj)
 
-    models = sorted(models)
+    models = sorted(models)  # type: ignore
     missing_models = [x for x in selected_models if x not in models]
     print(f"in models: {models}, number: {len(models)}")
     print(f"missing models: {missing_models}")

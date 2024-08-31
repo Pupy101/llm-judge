@@ -10,7 +10,7 @@ from typing import Optional
 import shortuuid
 import tqdm
 
-from llm_judge.common import (
+from llm_judge.mt_bench.common import (
     QUERY_DIR,
     chat_completion_giga,
     load_questions,
@@ -18,7 +18,7 @@ from llm_judge.common import (
     reorg_answer_file,
     temperature_config,
 )
-from llm_judge.model_adapter import get_conversation_template
+from llm_judge.mt_bench.model_adapter import get_conversation_template
 
 
 def get_answer(question: dict, model: str, config: dict, answer_file: str):
@@ -55,7 +55,7 @@ def get_answer(question: dict, model: str, config: dict, answer_file: str):
         fout.write(json.dumps(ans) + "\n")
 
 
-def run_bench(bench_name: str, dump_dir: Optional[str], config_path: str):
+def run_bench(bench_name: str, dump_dir: Optional[str], config_path: str, force: bool = False):
     config = load_yaml(config_path)
     question_file = str(QUERY_DIR / f"{bench_name}/question.jsonl")
     questions = load_questions(question_file, None, None)
@@ -71,6 +71,11 @@ def run_bench(bench_name: str, dump_dir: Optional[str], config_path: str):
         answer_file = f"data/{bench_name}/model_answer/{model}.jsonl"
     else:
         answer_file = f"{dump_dir}/{bench_name}/model_answer/{model}.jsonl"
+
+    if not force and os.path.exists(answer_file):
+        print(f"Output {answer_file} already exists")
+        return
+
     print(f"Output to {answer_file}")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=parallel) as executor:
