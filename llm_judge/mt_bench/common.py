@@ -18,7 +18,7 @@ from shooters.types import DevicesConfig, Message, OpenAIConfig
 
 from llm_judge.mt_bench.model_adapter import get_conversation_template
 
-QUERY_DIR = Path(__file__).parent / "data"
+DATA_DIR = Path(__file__).parent / "data"
 GIGACHAT_TOKEN: Optional[str] = None
 
 # API setting constants
@@ -106,7 +106,6 @@ def reorg_answer_file(answer_file):
 
 
 def load_questions(question_file: str, begin: Optional[int], end: Optional[int]):
-    """Load questions from a file."""
     questions = []
     with open(question_file, "r") as ques_file:
         for line in ques_file:
@@ -117,11 +116,6 @@ def load_questions(question_file: str, begin: Optional[int], end: Optional[int])
 
 
 def load_model_answers(answer_dir: str):
-    """Load model answers.
-
-    The return value is a python dict of type:
-    Dict[model_name: str -> Dict[question_id: int -> answer: dict]]
-    """
     filenames = glob.glob(os.path.join(answer_dir, "*.jsonl"))
     filenames.sort()
     model_answers = {}
@@ -139,11 +133,6 @@ def load_model_answers(answer_dir: str):
 
 
 def load_judge_prompts(prompt_file: str):
-    """Load judge prompts.
-
-    The return value is a python dict of type:
-    Dict[judge_name: str -> dict]
-    """
     prompts = {}
     with open(prompt_file) as fin:
         for line in fin:
@@ -245,7 +234,7 @@ def play_a_match_single(match: MatchSingle, config, output_file: str):
     return result
 
 
-def chat_completion_openai(conv, temperature, config):
+def chat_completion_openai(conv, temperature: float, config: dict) -> str:
     config_: dict = deepcopy(config)  # type: ignore
     params = config_.get("params")
     if params and isinstance(params, dict):
@@ -275,7 +264,7 @@ def chat_completion_openai(conv, temperature, config):
     return output
 
 
-def chat_completion_giga(conv, temperature, config):
+def chat_completion_giga(conv, temperature: float, config: dict) -> str:
     global GIGACHAT_TOKEN
     config_: dict = deepcopy(config)  # type: ignore
     params = config_.get("params")
@@ -320,7 +309,6 @@ def chat_completion_giga(conv, temperature, config):
 
 
 def normalize_game_key_single(gamekey, result):
-    """Make the model names sorted in a game key."""
     qid, model_1, model_2 = gamekey
     if model_1 < model_2:
         return gamekey, result
@@ -334,7 +322,6 @@ def normalize_game_key_single(gamekey, result):
 
 
 def normalize_game_key_dict(judgment_dict):
-    """Make the model names sorted in the game keys."""
     ret = {}
     for key, value in judgment_dict.items():
         new_key, new_value = normalize_game_key_single(key, value)
@@ -343,32 +330,39 @@ def normalize_game_key_dict(judgment_dict):
 
 
 def load_single_model_judgments(filename: str):
-    """Load model judgments.
-
-    The return value is a dict of type:
-    Dict[judge: Tuple -> Dict[game_key: tuple -> game_result: dict]
-    """
     judge_dict: dict = {}
 
-    for line in open(filename):
-        obj = json.loads(line)
-        judge = tuple(obj["judge"])
-        qid, model = obj["question_id"], obj["model"]
+    with open(filename) as fp:
+        for line in fp:
+            obj = json.loads(line)
+            judge = tuple(obj["judge"])
+            qid, model = obj["question_id"], obj["model"]
 
-        if judge not in judge_dict:
-            judge_dict[judge] = {}
+            if judge not in judge_dict:
+                judge_dict[judge] = {}
 
-        gamekey = (qid, model)
+            gamekey = (qid, model)
 
-        judge_dict[judge][gamekey] = {
-            "score": obj["score"],
-            "judgment": obj["judgment"],
-        }
-    return judge_dict
+            judge_dict[judge][gamekey] = {
+                "score": obj["score"],
+                "judgment": obj["judgment"],
+            }
+        return judge_dict
+
+
+def load_unique_judgments(filename: str) -> set:
+    judgments = set()
+    with open(filename) as fp:
+        for line in fp:
+            line = line.strip()
+            if not line:
+                continue
+            item = json.loads(line)
+            judgments.add((item["question_id"], item["model"], item["turn"]))
+    return judgments
 
 
 def resolve_single_judgment_dict(question, model_judgments_normal, model_judgments_math, multi_turn=False):
-    """Return the correct single answer grading judge."""
     if multi_turn:
         if question["category"] in NEED_REF_CATS:
             return model_judgments_math[("gpt-4", "single-math-v1-multi-turn")]

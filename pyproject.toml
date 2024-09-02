@@ -11,6 +11,8 @@ disable = [
     "missing-class-docstring",
     "broad-exception-caught",
     "unspecified-encoding",
+    "redefined-outer-name",
+    "too-many-statements",
     "global-statement",
     "too-many-locals",
     "duplicate-code",

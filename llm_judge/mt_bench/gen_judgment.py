@@ -1,29 +1,28 @@
 import argparse
 import json
 import logging
-import os
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional
+from typing import List, Optional
 
 import numpy as np
 from tqdm import tqdm
 
 from llm_judge.mt_bench.common import (
+    DATA_DIR,
     NEED_REF_CATS,
-    QUERY_DIR,
     Judge,
     MatchSingle,
     check_data,
-    load_jsonl,
     load_judge_prompts,
     load_model_answers,
     load_questions,
+    load_unique_judgments,
     load_yaml,
     play_a_match_single,
 )
 
 
-def make_match_single(questions, models, model_answers, judge, ref_answers=None, multi_turn=False):
+def make_match_single(questions, models, model_answers, judge, ref_answers=None, multi_turn=False) -> List[MatchSingle]:
     matches = []
     for q in questions:
         if multi_turn and len(q["turns"]) != 2:
@@ -53,10 +52,10 @@ def make_judge_single(judge_model, judge_prompts):
     return judges
 
 
-def run_judge(bench_name: str, dump_dir: Optional[str], config_path: str, force: bool = False) -> None:
-    question_file = str(QUERY_DIR.absolute() / f"{bench_name}/question.jsonl")
-    judge_file = str(QUERY_DIR.absolute() / "judge_prompts.jsonl")
-    ref_answer_dir = str(QUERY_DIR.absolute() / f"{bench_name}/reference_answer")
+def run_judge(bench_name: str, config_path: str, dump_dir: Optional[str] = None) -> None:
+    question_file = str(DATA_DIR.absolute() / f"{bench_name}/question.jsonl")
+    judge_file = str(DATA_DIR.absolute() / "judge_prompts.jsonl")
+    ref_answer_dir = str(DATA_DIR.absolute() / f"{bench_name}/reference_answer")
 
     if dump_dir is None:
         answer_dir = f"data/{bench_name}/model_answer"
@@ -79,13 +78,6 @@ def run_judge(bench_name: str, dump_dir: Optional[str], config_path: str, force:
     else:
         output_file = f"{dump_dir}/{bench_name}/model_judgment/{judge_model}_single.jsonl"
 
-    if os.path.exists(output_file) and not force:
-        data_ = load_jsonl(output_file)
-        models_ = {_["model"] for _ in data_}
-        if len(set(models) - models_) == 0:
-            print("In file %s already exists judgment")
-            return
-
     judges = make_judge_single(judge_model, judge_prompts)
     baseline_model = None
 
@@ -95,7 +87,7 @@ def run_judge(bench_name: str, dump_dir: Optional[str], config_path: str, force:
     question_default = [q for q in questions if q["category"] not in NEED_REF_CATS]
 
     # Make matches
-    matches: list = []
+    matches: List[MatchSingle] = []
     matches += make_match_single(question_default, models, model_answers, judges["default"])
     matches += make_match_single(question_math, models, model_answers, judges["math"], ref_answers)
     matches += make_match_single(question_default, models, model_answers, judges["default-mt"], multi_turn=True)
@@ -115,9 +107,23 @@ def run_judge(bench_name: str, dump_dir: Optional[str], config_path: str, force:
     print(json.dumps(match_stat, indent=4))
     input("Press Enter to confirm...")
 
+    unique_judgments = load_unique_judgments(output_file)
+
     # Play matches
+    count = 0
+    filtered_matches = []
+    for match in matches:
+        if (match.question["question_id"], match.model, 2 if match.multi_turn else 1) in unique_judgments:
+            count += 1
+            continue
+        filtered_matches.append(match)
+    print("Count skipped already judge examples: ", count)
+
     if parallel == 1:
-        for match in tqdm(matches):
+        for match in tqdm(filtered_matches):
+            if (match.question["question_id"], match.model, 2 if match.multi_turn else 1) in unique_judgments:
+                count += 1
+                continue
             play_a_match_single(match, config=judge_config, output_file=output_file)
     else:
 
@@ -125,10 +131,10 @@ def run_judge(bench_name: str, dump_dir: Optional[str], config_path: str, force:
             play_a_match_single(match, config=judge_config, output_file=output_file)
 
         np.random.seed(0)
-        np.random.shuffle(matches)
+        np.random.shuffle(filtered_matches)
 
         with ThreadPoolExecutor(parallel) as executor:
-            for match in tqdm(executor.map(play_a_match_wrapper, matches), total=len(matches)):
+            for match in tqdm(executor.map(play_a_match_wrapper, filtered_matches), total=len(matches)):
                 pass
 
 
@@ -139,4 +145,4 @@ def main():
     parser.add_argument("--config", "-cfg", type=str, required=True)
     args = parser.parse_args()
     logging.basicConfig(filename="gen_judgment.log", filemode="w", level=logging.DEBUG)
-    run_judge(args.bench_name, args.dump_dir, args.config)
+    run_judge(bench_name=args.bench_name, config_path=args.config, dump_dir=args.dump_dir)

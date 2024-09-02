@@ -1,1 +1,10 @@
 fschat@git+https://github.com/lm-sys/FastChat#egg=7850a26a289b05cb23577981c5af579d44b94daa"[llm_judge]"
+tiktoken
+openai
+numpy
+pandas
+shortuuid
+tqdm
+httpx==0.25.2
+plotly
+scikit-learn
