@@ -106,7 +106,6 @@ def run_judge(bench_name: str, config_path: str, dump_dir: Optional[str] = None)
     # Show match stats and prompt enter to continue
     print("Stats:")
     print(json.dumps(match_stat, indent=4))
-    input("Press Enter to confirm...")
 
     unique_judgments = load_unique_judgments(output_file) if os.path.exists(output_file) else set()
 
