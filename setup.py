@@ -34,11 +34,17 @@ setup(
     },
     package_data={
         "llm_judge": [
+            "arena_hard/data/arena_hard_en/*.jsonl",
+            "arena_hard/data/arena_hard_en/model_answer/*.jsonl",
+            "arena_hard/data/arena_hard_en/model_judgment/gpt-4o/*.jsonl",
+            "arena_hard/data/arena_hard_ru/*.jsonl",
+            "arena_hard/data/arena_hard_ru/model_answer/*.jsonl",
+            "arena_hard/data/arena_hard_ru/model_judgment/gpt-4o/*.jsonl",
+            "mt_bench/data/*.jsonl",
             "mt_bench/data/mt_bench_en/*.jsonl",
             "mt_bench/data/mt_bench_en/reference_answer/*.jsonl",
             "mt_bench/data/mt_bench_ru/*.jsonl",
             "mt_bench/data/mt_bench_ru/reference_answer/*.jsonl",
-            "mt_bench/data/*.jsonl",
         ]
     },
 )

@@ -1,6 +1,7 @@
 import argparse
 import json
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor
 from typing import List, Optional
 
@@ -107,7 +108,7 @@ def run_judge(bench_name: str, config_path: str, dump_dir: Optional[str] = None)
     print(json.dumps(match_stat, indent=4))
     input("Press Enter to confirm...")
 
-    unique_judgments = load_unique_judgments(output_file)
+    unique_judgments = load_unique_judgments(output_file) if os.path.exists(output_file) else set()
 
     # Play matches
     count = 0
