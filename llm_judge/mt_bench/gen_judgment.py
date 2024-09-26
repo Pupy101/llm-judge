@@ -8,6 +8,7 @@ from typing import List, Optional
 import numpy as np
 from tqdm import tqdm
 
+import llm_judge  # pylint: disable=unused-import
 from llm_judge.mt_bench.common import (
     DATA_DIR,
     NEED_REF_CATS,
@@ -131,14 +132,14 @@ def run_judge(bench_name: str, config_path: str, dump_dir: Optional[str] = None)
             play_a_match_single(match, config=judge_config, output_file=output_file)
 
         np.random.seed(0)
-        np.random.shuffle(filtered_matches)
+        np.random.shuffle(filtered_matches)  # type: ignore
 
         with ThreadPoolExecutor(parallel) as executor:
             for match in tqdm(executor.map(play_a_match_wrapper, filtered_matches), total=len(matches)):
                 pass
 
 
-def main():
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--bench-name", "-bench", type=str, default="mt_bench_en")
     parser.add_argument("--dump-dir", "-dump", type=str, default=None)

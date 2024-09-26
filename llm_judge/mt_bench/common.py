@@ -402,6 +402,7 @@ def check_data(questions, model_answers, ref_answers, models, judges):
         for q in questions:
             if q["category"] not in NEED_REF_CATS:
                 continue
+            assert jg.model_name in ref_answers, "Support openai models: " + ",".join(ref_answers.keys())
             assert (
                 q["question_id"] in ref_answers[jg.model_name]
             ), f"Missing reference answer to Question {q['question_id']} for judge {jg.model_name}"

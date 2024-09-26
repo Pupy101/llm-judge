@@ -13,6 +13,7 @@ import plotly.express as px
 from sklearn.linear_model import LogisticRegression
 from tqdm import tqdm
 
+import llm_judge  # pylint: disable=unused-import
 from llm_judge.arena_hard.utils import DATA_DIR, load_model_answers, make_config
 
 

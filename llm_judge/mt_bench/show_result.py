@@ -4,6 +4,7 @@ from typing import List, Optional
 
 import pandas as pd
 
+import llm_judge  # pylint: disable=unused-import
 from llm_judge.mt_bench.common import load_yaml
 
 
@@ -59,11 +60,11 @@ def display_result(bench_name: str, config_path: str, dump_dir: Optional[str] = 
     return output_metrics
 
 
-def main():
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--bench-name", "-bench", type=str, default="mt_bench_en")
     parser.add_argument("--config", "-cfg", type=str, required=True)
     parser.add_argument("--dump-dir", "-dump", type=str, default=None)
     args = parser.parse_args()
 
-    display_result_single(bench_name=args.bench_name, config_path=args.config, dump_dir=args.dump_dir)
+    display_result(bench_name=args.bench_name, config_path=args.config, dump_dir=args.dump_dir)

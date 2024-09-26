@@ -10,6 +10,7 @@ from typing import Optional
 import shortuuid
 import tqdm
 
+import llm_judge  # pylint: disable=unused-import
 from llm_judge.mt_bench.common import (
     DATA_DIR,
     chat_completion_giga,
@@ -99,7 +100,7 @@ def run_bench(bench_name: str, config_path: str, dump_dir: Optional[str] = None)
     reorg_answer_file(answer_file)
 
 
-def main():
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--bench-name", "-bench", type=str, default="mt_bench_en")
     parser.add_argument("--dump-dir", "-dump", type=str, default=None)
