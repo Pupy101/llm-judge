@@ -189,13 +189,11 @@ def get_battles_from_judgment(judge_name, dump_dir, bench_name, WEIGHT=3):
 
 
 def display_result(
-    bench_name: str, config_path: str, dump_dir: Optional[str] = None, num_round: int = 1000
+    bench_name: str, config_path: str, dump_dir: Optional[str] = None, num_round: int = 100
 ) -> List[dict]:
     config = make_config(config_path)
     openai_config = config["openai"]
     judge_model = openai_config["model"]
-    devices_config = config["devices"]
-    devices_model = devices_config["model"]
 
     if dump_dir is None:
         answer_dir = os.path.join("data", bench_name, "model_answer")
