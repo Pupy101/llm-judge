@@ -10,6 +10,7 @@ import shortuuid
 import tiktoken
 import tqdm
 
+import llm_judge  # pylint: disable=unused-import
 from llm_judge.arena_hard.utils import (
     DATA_DIR,
     chat_completion_giga,

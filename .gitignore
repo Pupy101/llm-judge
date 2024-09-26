@@ -12,3 +12,5 @@ __pycache__/
 **/logs/
 /data
 /.hidden
+*.jsonl
+*.json
