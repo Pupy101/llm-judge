@@ -94,7 +94,7 @@ def judgment(**args):
         f.write(json.dumps(output, ensure_ascii=False) + "\n")
 
 
-def run_judge(bench_name: str, config_path: str, dump_dir: Optional[str] = None) -> None:
+def run_judge(bench_name: str, config_path: str, baseline: str, dump_dir: Optional[str] = None) -> None:
     config = make_config(config_path)
     openai_config = config["openai"]
     judge_model = openai_config["model"]
@@ -148,7 +148,8 @@ def run_judge(bench_name: str, config_path: str, dump_dir: Optional[str] = None)
 
                 kwargs["answer"] = model_answers[model][question_id]
                 kwargs["reference"] = None
-                kwargs["baseline_answer"] = cached_model_answers[judge_model][question_id]
+                assert baseline in cached_model_answers, f"Not found any answers for baseline model: {baseline}"
+                kwargs["baseline_answer"] = cached_model_answers[baseline][question_id]
                 kwargs["output_file"] = output_files[model]
                 kwargs["regex_pattern"] = pattern
                 kwargs["judge_model"] = judge_model
