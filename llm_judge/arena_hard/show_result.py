@@ -122,7 +122,7 @@ def get_win_rate_column(df, column, baseline="gpt-4-0314"):
     return win_rate_table[baseline].fillna(0.5).apply(lambda x: round(x * 100, 2))
 
 
-def get_battles_from_judgment(judge_name, dump_dir, bench_name, WEIGHT=3):
+def get_battles_from_judgment(judge_name, baseline, dump_dir, bench_name, WEIGHT=3):
     arena_hard_battles = pd.DataFrame()
 
     print("Turning judgment results into battles...")
@@ -140,7 +140,7 @@ def get_battles_from_judgment(judge_name, dump_dir, bench_name, WEIGHT=3):
 
         for _, row in df.iterrows():
             # game 1
-            output = {"question_id": row["question_id"], "model_a": judge_name, "model_b": row["model"]}
+            output = {"question_id": row["question_id"], "model_a": baseline, "model_b": row["model"]}
 
             game = row["games"][0]
 
@@ -163,7 +163,7 @@ def get_battles_from_judgment(judge_name, dump_dir, bench_name, WEIGHT=3):
             if weight:
                 arena_hard_battles = pd.concat([arena_hard_battles, pd.DataFrame([output] * weight)])
 
-            output = {"question_id": row["question_id"], "model_a": judge_name, "model_b": row["model"]}
+            output = {"question_id": row["question_id"], "model_a": baseline, "model_b": row["model"]}
 
             game = row["games"][1]
 
@@ -190,24 +190,25 @@ def get_battles_from_judgment(judge_name, dump_dir, bench_name, WEIGHT=3):
 
 
 def display_result(
-    bench_name: str, config_path: str, dump_dir: Optional[str] = None, num_round: int = 100
+    bench_name: str, config_path: str, baseline: str, dump_dir: Optional[str] = None, num_round: int = 100
 ) -> List[dict]:
     config = make_config(config_path)
     openai_config = config["openai"]
     judge_model = openai_config["model"]
 
+    model_answers = load_model_answers(str(DATA_DIR / bench_name / "model_answer"))
     if dump_dir is None:
         answer_dir = os.path.join("data", bench_name, "model_answer")
     else:
         answer_dir = os.path.join(dump_dir, bench_name, "model_answer")
-    model_answers = load_model_answers(answer_dir)
+    model_answers.update(load_model_answers(answer_dir))
 
-    battles = get_battles_from_judgment(judge_model, dump_dir=dump_dir, bench_name=bench_name)
+    battles = get_battles_from_judgment(judge_model, baseline=baseline, dump_dir=dump_dir, bench_name=bench_name)
 
-    bootstrap_online_elo = compute_mle_elo(battles, baseline_model=judge_model)
+    bootstrap_online_elo = compute_mle_elo(battles, baseline_model=baseline)
 
     np.random.seed(42)
-    bootstrap_elo_lu = get_bootstrap_result(battles, compute_mle_elo, num_round, judge_model)
+    bootstrap_elo_lu = get_bootstrap_result(battles, compute_mle_elo, num_round, baseline_model=baseline)
     if dump_dir is None:
         bootsrap_output = "data/bootstrapping_results.jsonl"
     else:
@@ -237,9 +238,9 @@ def display_result(
         stats.at[i, "results"] = bootstrap_elo_lu[model].tolist()
 
     stats.sort_values(by="model", inplace=True)
-    stats["score"] = get_win_rate_column(stats, "score", judge_model).tolist()
-    stats["lower"] = get_win_rate_column(stats, "lower", judge_model).tolist()
-    stats["upper"] = get_win_rate_column(stats, "upper", judge_model).tolist()
+    stats["score"] = get_win_rate_column(stats, "score", baseline=baseline).tolist()
+    stats["lower"] = get_win_rate_column(stats, "lower", baseline=baseline).tolist()
+    stats["upper"] = get_win_rate_column(stats, "upper", baseline=baseline).tolist()
     decimal = 1
 
     metrics: List[dict] = []
@@ -285,6 +286,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--bench-name", type=str, default="arena_hard_en")
     parser.add_argument("--config", "-cfg", type=str, required=True)
+    parser.add_argument("--baseline", "-base", type=str, required=True)
     parser.add_argument("--dump-dir", "-dump", type=str, default=None)
     args = parser.parse_args()
-    display_result(bench_name=args.bench_name, config_path=args.config, dump_dir=args.dump_dir)
+    display_result(bench_name=args.bench_name, config_path=args.config, baseline=args.baseline, dump_dir=args.dump_dir)
