@@ -17,7 +17,10 @@ def load_jsonl(path: Union[str, Path]) -> Any:
         for line in fp:
             line = line.strip()
             if line:
-                data.append(json.loads(line))
+                try:
+                    data.append(json.loads(line))
+                except json.JSONDecodeError:
+                    continue
     return data
 
 
@@ -38,26 +41,29 @@ def extract_zip(directory: Union[str, Path]) -> None:
         pool.map(extract, Path(directory).rglob("*.zip"))
 
 
-def union_jsonl(directory: Union[str, Path]) -> None:
-    directory = Path(directory)
-    mapping: Dict[Path, List[Path]] = defaultdict(list)
-    for file in directory.rglob("*.jsonl"):
-        if PART_FILE.match(file.stem) is None:
-            continue
-        mapping[file.parent].append(file)
-    for files in mapping.values():
-        if len(files) < 2:
-            continue
-        data = []
-        for file in files:
-            data.extend(load_jsonl(file))
-        match = PART_FILE.match(files[0].stem)
-        assert match is not None
-        file_stem = match.group(1)
-        assert isinstance(file_stem, str)
-        file_path = files[0].with_stem(file_stem)
-        dump_jsonl(data, file_path)
+# def union_jsonl(directory: Union[str, Path]) -> None:
+#     directory = Path(directory)
+#     mapping: Dict[Path, List[Path]] = defaultdict(list)
+#     for file in directory.rglob("*.jsonl"):
+#         if PART_FILE.match(file.stem) is None:
+#             continue
+#         mapping[file.parent].append(file)
+#     for files in mapping.values():
+#         if len(files) < 2:
+#             continue
+#         data = []
+#         for file in files:
+#             try:
+#                 data.extend(load_jsonl(file))
+#             except Exception:
+#                 break
+#         match = PART_FILE.match(files[0].stem)
+#         assert match is not None
+#         file_stem = match.group(1)
+#         assert isinstance(file_stem, str)
+#         file_path = files[0].with_stem(file_stem)
+#         dump_jsonl(data, file_path)
 
 
 extract_zip(Path(__file__).parent)
-union_jsonl(Path(__file__).parent)
+# union_jsonl(Path(__file__).parent)

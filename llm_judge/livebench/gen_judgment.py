@@ -1,4 +1,5 @@
 import argparse
+import json
 import logging
 import os
 import time
@@ -15,10 +16,8 @@ from llm_judge.livebench.common import (
     DATA_DIR,
     MatchSingle,
     check_data,
-    get_categories_tasks,
     get_model_list,
     load_model_answers,
-    load_questions,
     load_questions_jsonl,
     load_yaml,
     make_match_single,
@@ -161,7 +160,6 @@ def gen_judgments(parallel, questions, output_file, answer_dir, model_list, remo
 
     # Load answers
     model_answers = load_model_answers(answer_dir)
-    print("models:", model_answers.keys())
 
     if model_list is None:
         models = get_model_list(answer_dir)
