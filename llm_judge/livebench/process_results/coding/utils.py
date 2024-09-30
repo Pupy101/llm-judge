@@ -5,8 +5,8 @@ import zlib
 from dataclasses import dataclass
 from enum import Enum
 
-from livebench.lcb_runner.evaluation.compute_code_generation_metrics import codegen_metrics
-from livebench.lcb_runner.utils.extraction_utils import extract_code
+from llm_judge.livebench.lcb_runner.evaluation.compute_code_generation_metrics import codegen_metrics
+from llm_judge.livebench.lcb_runner.utils.extraction_utils import extract_code
 
 # from LiveCodebench, modified
 
