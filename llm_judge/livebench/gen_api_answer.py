@@ -102,7 +102,7 @@ def run_bench(bench_name: str, config_path: str, dump_dir: Optional[str] = None)
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--bench-name", "-bench", type=str, default="live_bench")
+    parser.add_argument("--bench-name", "-bench", type=str, default="livebench")
     parser.add_argument("--dump-dir", "-dump", type=str, default=None)
     parser.add_argument("--config", "-cfg", type=str, required=True)
     args = parser.parse_args()

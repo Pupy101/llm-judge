@@ -38,12 +38,12 @@ setup(
             "mt_bench/data/mt_bench_en/reference_answer/*.zip",
             "mt_bench/data/mt_bench_ru/*.zip",
             "mt_bench/data/mt_bench_ru/reference_answer/*.zip",
-            "livebench/data/live_bench/coding/*.zip",
-            "livebench/data/live_bench/data_analysis/*.zip",
-            "livebench/data/live_bench/instruction_following/*.zip",
-            "livebench/data/live_bench/language/*.zip",
-            "livebench/data/live_bench/math/*.zip",
-            "livebench/data/live_bench/reasoning/*.zip",
+            "livebench/data/livebench/coding/*.zip",
+            "livebench/data/livebench/data_analysis/*.zip",
+            "livebench/data/livebench/instruction_following/*.zip",
+            "livebench/data/livebench/language/*.zip",
+            "livebench/data/livebench/math/*.zip",
+            "livebench/data/livebench/reasoning/*.zip",
         ]
     },
 )
