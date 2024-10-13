@@ -5,12 +5,10 @@ import os
 import re
 import time
 from copy import deepcopy
-from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 import yaml
-from datasets import Dataset, load_dataset
 from shooters.core.utils import sync_retry_supress
 from shooters.devices import sync_chat_completion as giga_sync_chat_completion
 from shooters.devices import sync_token as giga_sync_token
@@ -59,90 +57,6 @@ def load_yaml(path: str):
     with open(path) as fp:
         config = yaml.safe_load(fp)
     return config
-
-
-def get_categories_tasks(bench_name: str):
-    split_bench_name = bench_name.rstrip("/").split("/")
-    assert split_bench_name[0] == "live_bench"
-    if len(split_bench_name) == 1:
-        # specify entire bench
-
-        categories = {category_name: get_hf_dataset(category_name) for category_name in LIVE_BENCH_CATEGORIES}
-
-        tasks = {
-            category_name: get_tasks_from_hf_category(categories[category_name])
-            for category_name in LIVE_BENCH_CATEGORIES
-        }
-
-    else:
-        # specify a category or task
-        category_name = split_bench_name[1]
-
-        categories = {category_name: get_hf_dataset(category_name)}
-
-        if len(split_bench_name) == 2:
-            tasks = {category_name: get_tasks_from_hf_category(categories[category_name])}
-        else:
-            assert len(split_bench_name) == 3
-            task_name = split_bench_name[2]
-            tasks = {category_name: [task_name]}
-
-    return categories, tasks
-
-
-def get_hf_dataset(dataset_name: str, split="test"):
-    return load_dataset(f"{LIVE_BENCH_HF_ORGANIZATION}/{dataset_name}", split=split)
-
-
-def get_tasks_from_hf_category(category: Dataset):
-    return list(set(category["task"]))
-
-
-def load_answers_judgments():
-    model_judgment_dataset = get_hf_dataset("model_judgment", split="leaderboard")
-    model_answer_dataset = get_hf_dataset("model_answer", split="leaderboard")
-
-    model_judgment = {
-        category_name: [
-            example for example in model_judgment_dataset.filter(lambda row: row["category"] == category_name)
-        ]
-        for category_name in LIVE_BENCH_CATEGORIES
-    }
-
-    model_answer = {
-        category_name: [
-            example for example in model_answer_dataset.filter(lambda row: row["category"] == category_name)
-        ]
-        for category_name in LIVE_BENCH_CATEGORIES
-    }
-
-    return model_answer, model_judgment
-
-
-def load_questions(
-    category: Dataset, livebench_releases: set, task_name: Optional[str], begin: Optional[int], end: Optional[int]
-):
-    """Load questions from a file."""
-    if task_name is not None:
-        questions = list(category.filter(lambda row: row["task"] == task_name))
-    else:
-        questions = list(category)
-    questions = questions[begin:end]
-    for q in questions:
-        if "livebench_release_date" in q.keys() and isinstance(q["livebench_release_date"], datetime):
-            q["livebench_release_date"] = datetime.strftime(q["livebench_release_date"], "%Y-%m-%d")
-        if "release_date" in q.keys() and isinstance(q["release_date"], datetime):
-            q["release_date"] = datetime.strftime(q["release_date"], "%Y-%m-%d")
-        if (
-            "original_json" in q.keys()
-            and "contest_date" in q["original_json"].keys()
-            and isinstance(q["original_json"]["contest_date"], datetime)
-        ):
-            q["original_json"]["contest_date"] = datetime.strftime(
-                q["original_json"]["contest_date"], "%Y-%m-%d %H:%M:%S"
-            )
-    questions = [q for q in questions if q["livebench_release_date"] in livebench_releases]
-    return questions
 
 
 def load_questions_jsonl(question_file: str, livebench_releases: set, begin: Optional[int], end: Optional[int]):

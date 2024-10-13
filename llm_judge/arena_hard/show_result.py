@@ -134,7 +134,7 @@ def get_battles_from_judgment(judge_name, baseline, dump_dir, bench_name, WEIGHT
 
     inner_dir = str(DATA_DIR / bench_name / f"model_judgment/{judge_name}")
 
-    assert os.path.exists(directory)
+    assert os.path.exists(directory), directory
     for file in tqdm(glob(f"{directory}/*jsonl") + glob(f"{inner_dir}/*jsonl")):
         df = pd.read_json(file, lines=True)
 
