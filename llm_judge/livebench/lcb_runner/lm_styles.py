@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from typing import Dict, List, Optional
 
 
 class LMStyle(Enum):
@@ -32,14 +33,14 @@ class LanguageModel:
     model_name: str
     model_repr: str
     model_style: LMStyle
-    release_date: datetime | None  # XXX Should we use timezone.utc?
-    link: str | None = None
+    release_date: Optional[datetime]  # XXX Should we use timezone.utc?
+    link: Optional[str] = None
 
     def __hash__(self) -> int:
         return hash(self.model_name)
 
 
-LanguageModelList: list[LanguageModel] = [
+LanguageModelList: List[LanguageModel] = [
     LanguageModel(
         "deepseek-ai/deepseek-coder-33b-instruct",
         "DSCoder-33b-Ins",
@@ -371,9 +372,7 @@ LanguageModelList: list[LanguageModel] = [
     ),
 ]
 
-LanguageModelStore: dict[str, LanguageModel] = {
-    lm.model_name: lm for lm in LanguageModelList
-}
+LanguageModelStore: Dict[str, LanguageModel] = {lm.model_name: lm for lm in LanguageModelList}
 
 if __name__ == "__main__":
     print(list(LanguageModelStore.keys()))

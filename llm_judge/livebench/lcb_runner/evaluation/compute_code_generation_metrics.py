@@ -45,7 +45,7 @@ def check_correctness(sample, generation, timeout, debug=True):
 
 
 def evaluate_generations_by_problem(args):
-    problem_generations: list[str] = args[0]
+    problem_generations: List[str] = args[0]
     sample = args[1]
     debug: bool = args[2]
     timeout: int = args[3]
