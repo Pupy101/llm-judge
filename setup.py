@@ -32,7 +32,7 @@ setup(
             "arena_hard/data/arena_hard_en/model_judgment/gpt-4o/*.zip",
             "arena_hard/data/arena_hard_ru/*.zip",
             "arena_hard/data/arena_hard_ru/model_answer/*.zip",
-            "arena_hard/data/arena_hard_ru/model_judgment/gpt-4o/*.zip",
+            "arena_hard/data/arena_hard_ru/model_judgment/gpt-4-1106-preview/*.zip",
             "mt_bench/data/*.zip",
             "mt_bench/data/mt_bench_en/*.zip",
             "mt_bench/data/mt_bench_en/reference_answer/*.zip",
