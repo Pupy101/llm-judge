@@ -4,6 +4,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import json
 import multiprocessing
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from typing import List
 
 import numpy as np
 from tqdm import tqdm
@@ -91,7 +92,7 @@ def evaluate_generations_by_problem(args):
 
 def evaluate_generations(
     samples_list: list,
-    generations_list: list[list[str]],
+    generations_list: List[List[str]],
     debug: bool = False,
     num_process_evaluate: int = 16,
     timeout=6,
