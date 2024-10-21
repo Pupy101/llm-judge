@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import time
+import warnings
 from typing import Optional
 
 import shortuuid
@@ -23,6 +24,11 @@ from llm_judge.arena_hard.utils import (
 
 
 def get_answer(question: dict, temperature: Optional[float], answer_file: str, config: dict):
+    if {k for k, v in config.items() if v is not None} - {"max_tokens", "profanity_check"}:
+        warnings.warn(
+            f"To measure, you do not need to specify generation parameters other than `max_tokens` and `profanity_check`: {config}"
+        )
+
     if question["category"] in temperature_config:
         temperature = temperature_config[question["category"]]
 

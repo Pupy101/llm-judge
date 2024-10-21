@@ -75,6 +75,8 @@ def run_judge(bench_name: str, config_path: str, dump_dir: Optional[str] = None)
     judge_model = judge_config["model"]
     parallel = config["parallel"]
 
+    assert judge_model == "gpt-4", judge_model
+
     if dump_dir is None:
         output_file = f"data/{bench_name}/model_judgment/{judge_model}_single.jsonl"
     else:

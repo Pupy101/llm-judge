@@ -14,3 +14,4 @@ __pycache__/
 /.hidden
 *.jsonl
 *.json
+.DS_Store
