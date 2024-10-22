@@ -24,9 +24,10 @@ from llm_judge.arena_hard.utils import (
 
 
 def get_answer(question: dict, temperature: Optional[float], answer_file: str, config: dict):
-    if {k for k, v in config.items() if v is not None} - {"max_tokens", "profanity_check"}:
+    attributes = {k for k, v in config.items() if v is not None} - {"max_tokens", "profanity_check", "top_p", "temperature"}
+    if attributes or config.get("temperature", -1) != 1 or config.get("top_p", -1) != 0:
         warnings.warn(
-            f"To measure, you do not need to specify generation parameters other than `max_tokens` and `profanity_check`: {config}"
+            f"To measure, you do not need to specify generation parameters other than `max_tokens`, `profanity_check` and use greedy generation parameters (temperature=1 top_p=0). Your config: {config}"
         )
 
     if question["category"] in temperature_config:
