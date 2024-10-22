@@ -90,7 +90,7 @@ def run_bench(bench_name: str, config_path: str, dump_dir: Optional[str] = None)
         if dump_dir is None:
             answer_file = f"data/{bench_name}/{question_file.parent.name}/model_answer/{model}.jsonl"
         else:
-            answer_file = f"{dump_dir}/data/{bench_name}/{question_file.parent.name}/model_answer/{model}.jsonl"
+            answer_file = f"{dump_dir}/{bench_name}/{question_file.parent.name}/model_answer/{model}.jsonl"
 
         print(f"Questions from {question_file}")
         print(f"Output to {answer_file}")
