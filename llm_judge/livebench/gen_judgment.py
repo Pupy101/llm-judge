@@ -265,11 +265,11 @@ def run_judge(bench_name: str, config_path: str, dump_dir: Optional[str] = None)
         if dump_dir is None:
             answer_dir = f"data/{bench_name}/{question_file.parent.name}/model_answer/"
         else:
-            answer_dir = f"{dump_dir}/data/{bench_name}/{question_file.parent.name}/model_answer/"
+            answer_dir = f"{dump_dir}/{bench_name}/{question_file.parent.name}/model_answer/"
 
         if dump_dir is not None:
             output_file = (
-                f"{dump_dir}/data/{bench_name}/{question_file.parent.name}/model_judgment/ground_truth_judgment.jsonl"
+                f"{dump_dir}/{bench_name}/{question_file.parent.name}/model_judgment/ground_truth_judgment.jsonl"
             )
         else:
             output_file = f"data/{bench_name}/{question_file.parent.name}/model_judgment/ground_truth_judgment.jsonl"
