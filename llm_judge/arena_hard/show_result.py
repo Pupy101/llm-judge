@@ -185,7 +185,7 @@ def get_battles_from_judgment(judge_name, baseline, dump_dir, bench_name, WEIGHT
 
                 if weight:
                     arena_hard_battles = pd.concat([arena_hard_battles, pd.DataFrame([output] * weight)])
-    arena_hard_battles.to_json("data/arena_hard_battles.jsonl", lines=True, orient="records")
+    arena_hard_battles.to_json(f"{directory}/arena_hard_battles.jsonl", lines=True, orient="records")
     return arena_hard_battles
 
 
