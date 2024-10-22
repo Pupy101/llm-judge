@@ -68,7 +68,8 @@ def LCB_generation_process_results(question: dict, llm_answer: str) -> int:
                 "inputs": [t.input for t in public_test_cases + private_test_cases],
                 "outputs": [t.output for t in public_test_cases + private_test_cases],
                 "fn_name": metadata.get("func_name", None),
-            }
+            },
+            ensure_ascii=False
         )
     }
 

@@ -229,7 +229,7 @@ def play_a_match_single(match: MatchSingle, config, output_file: str):
     if output_file:
         os.makedirs(Path(output_file).parent, exist_ok=True)
         with open(output_file, "a") as fout:
-            fout.write(json.dumps(result) + "\n")
+            fout.write(json.dumps(result, ensure_ascii=False) + "\n")
 
     return result
 

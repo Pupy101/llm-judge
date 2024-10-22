@@ -254,7 +254,7 @@ def run_test(sample, test=None, debug=False, timeout=6):
                     output = method(*inputs)
                     raw_true_output = output
 
-                    raw_true_output_copy = json.dumps(output)
+                    raw_true_output_copy = json.dumps(output, ensure_ascii=False)
                     raw_true_output_copy = truncatefn(raw_true_output_copy, 200)
 
                     # ground truth sequences are not tuples

@@ -75,7 +75,7 @@ def run_judge(bench_name: str, config_path: str, dump_dir: Optional[str] = None)
     judge_model = judge_config["model"]
     parallel = config["parallel"]
 
-    assert judge_model == "gpt-4", judge_model
+    assert judge_model == "gpt-4-1106-preview", judge_model
 
     if dump_dir is None:
         output_file = f"data/{bench_name}/model_judgment/{judge_model}_single.jsonl"
@@ -108,7 +108,7 @@ def run_judge(bench_name: str, config_path: str, dump_dir: Optional[str] = None)
 
     # Show match stats and prompt enter to continue
     print("Stats:")
-    print(json.dumps(match_stat, indent=4))
+    print(json.dumps(match_stat, indent=4, ensure_ascii=False))
 
     unique_judgments = load_unique_judgments(output_file) if os.path.exists(output_file) else set()
 

@@ -51,7 +51,7 @@ def get_answer(question: dict, model: str, config: dict, answer_file: str):
 
     os.makedirs(Path(answer_file).parent, exist_ok=True)
     with open(answer_file, "a") as fout:
-        fout.write(json.dumps(ans) + "\n")
+        fout.write(json.dumps(ans, ensure_ascii=False) + "\n")
 
 
 def run_questions(parallel, questions, model, config, answer_file):

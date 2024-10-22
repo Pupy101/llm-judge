@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Dict, List, Union
 
-__version__ = "0.0.3.2"
+__version__ = "0.0.3.3"
 
 PART_FILE = re.compile(r"([\w\d]+?)-([\d]+)")
 

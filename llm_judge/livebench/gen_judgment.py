@@ -151,7 +151,7 @@ def play_a_match_gt(match: MatchSingle, output_file: str):
     if output_file:
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         with open(output_file, "a") as fout:
-            fout.write(json.dumps(result) + "\n")
+            fout.write(json.dumps(result, ensure_ascii=False) + "\n")
 
     return result
 
@@ -192,7 +192,7 @@ def gen_judgments(parallel, questions, output_file, answer_dir, model_list, remo
 
     # Show match stats and prompt enter to continue
     print("Stats:")
-    print(json.dumps(match_stat, indent=4))
+    print(json.dumps(match_stat, indent=4, ensure_ascii=False))
     # input("Press Enter to confirm...")
 
     if "instruction_following" in bench_name:
@@ -224,7 +224,7 @@ def gen_judgments(parallel, questions, output_file, answer_dir, model_list, remo
                 if output_file:
                     os.makedirs(Path(output_file).parent, exist_ok=True)
                     with open(output_file, "a") as fout:
-                        fout.write(json.dumps(result) + "\n")
+                        fout.write(json.dumps(result, ensure_ascii=False) + "\n")
     else:
         # Play matches
         if parallel == 1:

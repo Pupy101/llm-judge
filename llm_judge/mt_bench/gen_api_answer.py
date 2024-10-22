@@ -54,7 +54,7 @@ def get_answer(question: dict, model: str, config: dict, answer_file: str):
 
     os.makedirs(Path(answer_file).parent, exist_ok=True)
     with open(answer_file, "a") as fout:
-        fout.write(json.dumps(ans) + "\n")
+        fout.write(json.dumps(ans, ensure_ascii=False) + "\n")
 
 
 def run_bench(bench_name: str, config_path: str, dump_dir: Optional[str] = None):

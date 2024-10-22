@@ -155,9 +155,9 @@ def codegen_metrics(
         final_metadata.append(metadata[key])
     for i in range(len(final_metadata)):
         if type(final_metadata[i]) is not list:
-            final_metadata[i] = [json.dumps(final_metadata[i])]
+            final_metadata[i] = [json.dumps(final_metadata[i], ensure_ascii=False)]
         else:
-            final_metadata[i] = [json.dumps(x) for x in final_metadata[i]]
+            final_metadata[i] = [json.dumps(x, ensure_ascii=False) for x in final_metadata[i]]
 
         assert len(final_metadata[i]) == len(generations[0]), f"{len(final_metadata[i])=}"
 

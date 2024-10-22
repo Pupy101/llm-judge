@@ -57,7 +57,7 @@ def get_answer(question: dict, temperature: Optional[float], answer_file: str, c
 
     os.makedirs(os.path.dirname(answer_file), exist_ok=True)
     with open(answer_file, "a") as fout:
-        fout.write(json.dumps(ans) + "\n")
+        fout.write(json.dumps(ans, ensure_ascii=False) + "\n")
 
 
 def run_bench(bench_name: str, config_path: str, dump_dir: Optional[str] = None):
