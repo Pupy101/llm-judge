@@ -2,7 +2,6 @@ import re
 
 
 def house_traversal_process_results(ground_truth: str, llm_answer: str) -> int:
-
     # pull out words in bold
     bold_words = re.findall(r"(\*{2,})(.*?)\1", llm_answer.lower())
     if not len(bold_words):

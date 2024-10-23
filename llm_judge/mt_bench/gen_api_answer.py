@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import time
+from copy import deepcopy
 from pathlib import Path
 from typing import Optional
 
@@ -24,12 +25,19 @@ from llm_judge.mt_bench.model_adapter import get_conversation_template
 
 
 def get_answer(question: dict, model: str, config: dict, answer_file: str):
+    config = deepcopy(config)
     if "required_temperature" in question.keys():
         temperature = max(question["required_temperature"], 0.01)
     elif question["category"] in temperature_config:
         temperature = temperature_config[question["category"]]
     else:
         temperature = 0.7
+
+    if temperature == 0.0:
+        temperature = 1
+        params: dict = config.get("params", {})
+        params["top_p"] = 0
+        config["params"] = params
 
     conv = get_conversation_template(model)
 

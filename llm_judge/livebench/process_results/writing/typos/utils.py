@@ -2,11 +2,9 @@ import difflib
 
 
 def typos_process_results(ground_truth: str, llm_answer: str, debug=False) -> int:
-
     llm_answer = list(filter(None, llm_answer.split("\n")))[-1]
 
     if debug and ground_truth not in llm_answer:
-
         a = ground_truth
         b = llm_answer
         m = difflib.SequenceMatcher(a=a, b=b)

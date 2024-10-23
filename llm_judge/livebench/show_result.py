@@ -9,7 +9,6 @@ from llm_judge.livebench.common import DATA_DIR, load_questions_jsonl
 
 
 def display_result(bench_name: str, config_path: str, dump_dir: Optional[str] = None):
-
     release_set = set(["2024-07-26", "2024-06-24"])
 
     directory = f"data/{bench_name}" if dump_dir is None else f"{dump_dir}/data/{bench_name}"

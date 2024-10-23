@@ -2,7 +2,6 @@ import re
 
 
 def web_of_lies_process_results(ground_truth: str, llm_answer: str) -> int:
-
     # pull out words in bold
     bold_words = re.findall(r"\*\*(.*?)\*\*", llm_answer)
 

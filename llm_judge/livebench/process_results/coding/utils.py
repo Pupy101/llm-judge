@@ -30,7 +30,6 @@ class Test:
 
 
 def LCB_generation_process_results(question: dict, llm_answer: str) -> int:
-
     llm_answer = extract_code(
         model_output=llm_answer, lmstyle=None
     )  # Missing out only on some slightly different handling for CodeLlamaInstruct from the original LiveCodeBench
@@ -69,7 +68,7 @@ def LCB_generation_process_results(question: dict, llm_answer: str) -> int:
                 "outputs": [t.output for t in public_test_cases + private_test_cases],
                 "fn_name": metadata.get("func_name", None),
             },
-            ensure_ascii=False
+            ensure_ascii=False,
         )
     }
 

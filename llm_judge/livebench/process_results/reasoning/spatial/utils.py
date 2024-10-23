@@ -3,7 +3,6 @@ from typing import Optional
 
 
 def spatial_process_results(ground_truth: str, llm_answer: str) -> int:
-
     word_to_number = {
         "zero": "0",
         "one": "1",

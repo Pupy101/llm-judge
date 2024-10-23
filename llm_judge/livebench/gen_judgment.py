@@ -157,7 +157,6 @@ def play_a_match_gt(match: MatchSingle, output_file: str):
 
 
 def gen_judgments(parallel, questions, output_file, answer_dir, model_list, remove_existing_file, bench_name):
-
     # Load answers
     model_answers = load_model_answers(answer_dir)
 

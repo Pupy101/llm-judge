@@ -13,7 +13,6 @@ def group_words(s):
 
 
 def connections_process_results(ground_truth: str, llm_answer: str) -> int:
-
     # pull out words in bold
     bold_words = re.findall(r"\*\*(.*?)\*\*", llm_answer)
 
@@ -23,7 +22,6 @@ def connections_process_results(ground_truth: str, llm_answer: str) -> int:
     ground_truth_groups = group_words(ground_truth)
     max_score = 0
     for output_groups in list(map(group_words, bold_words)):
-
         correct_groups = 0
         for ground_truth_group in ground_truth_groups:
             for output_group in output_groups:

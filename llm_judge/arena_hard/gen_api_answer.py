@@ -5,6 +5,7 @@ import logging
 import os
 import time
 import warnings
+from copy import deepcopy
 from typing import Optional
 
 import shortuuid
@@ -24,15 +25,17 @@ from llm_judge.arena_hard.utils import (
 
 
 def get_answer(question: dict, temperature: Optional[float], answer_file: str, config: dict):
-    params = config.get("params", {})
-    attributes = {k for k, v in params.items() if v is not None} - {"max_tokens", "profanity_check", "top_p", "temperature"}
-    if attributes or params.get("temperature", -1) != 1 or params.get("top_p", -1) != 0:
-        warnings.warn(
-            f"To measure, you do not need to specify generation parameters other than `max_tokens`, `profanity_check` and use greedy generation parameters (temperature=1 top_p=0). Your params: {params}"
-        )
-
+    config = deepcopy(config)
     if question["category"] in temperature_config:
         temperature = temperature_config[question["category"]]
+    else:
+        temperature = 0.0
+
+    if temperature == 0.0:
+        temperature = 1
+        params: dict = config.get("params", {})
+        params["top_p"] = 0
+        config["params"] = params
 
     conv = [{"role": "system", "content": "You are a helpful assistant."}]
 

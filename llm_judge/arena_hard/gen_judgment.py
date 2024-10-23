@@ -73,7 +73,7 @@ def judgment(**args):
 
         judgment = ""
         for _ in range(2):
-            new_judgment = chat_completion_openai(conv, 0.1, config)
+            new_judgment = chat_completion_openai(conv, 0.0, config)
 
             judgment += "\n" + new_judgment
 
@@ -98,15 +98,14 @@ def judgment(**args):
 def run_judge(bench_name: str, config_path: str, baseline: str, dump_dir: Optional[str] = None) -> None:
     config = make_config(config_path)
     openai_config = config["openai"]
-    judge_model = openai_config["model"]
+    judge_model = "gpt-4-1106-preview"
+    print("Use gpt-4-1106-preview as judge model")
     parallel = config["parallel"]
 
     if bench_name.endswith("en"):
         assert baseline == "gpt-4-0314", baseline
-        assert judge_model == "gpt-4-1106-preview", judge_model
     elif bench_name.endswith("ru"):
         assert baseline == "gpt-3.5-turbo-0125", baseline
-        assert judge_model == "gpt-4-1106-preview", judge_model
 
     pattern = re.compile("\[\[([AB<>=]+)\]\]")
 

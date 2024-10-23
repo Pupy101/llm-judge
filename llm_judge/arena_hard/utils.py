@@ -25,10 +25,10 @@ DATA_DIR = Path(__file__).parent / "data"
 temperature_config = {
     "writing": 0.7,
     "roleplay": 0.7,
-    "extraction": 0.01,
-    "math": 0.01,
-    "coding": 0.01,
-    "reasoning": 0.01,
+    "extraction": 0.0,
+    "math": 0.0,
+    "coding": 0.0,
+    "reasoning": 0.0,
     "stem": 0.1,
     "humanities": 0.1,
 }
