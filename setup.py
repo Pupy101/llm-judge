@@ -29,7 +29,7 @@ setup(
         "llm_judge": [
             "arena_hard/data/arena_hard_en/*.zip",
             "arena_hard/data/arena_hard_en/model_answer/*.zip",
-            "arena_hard/data/arena_hard_en/model_judgment/gpt-4o/*.zip",
+            "arena_hard/data/arena_hard_en/model_judgment/gpt-4-1106-preview/*.zip",
             "arena_hard/data/arena_hard_ru/*.zip",
             "arena_hard/data/arena_hard_ru/model_answer/*.zip",
             "arena_hard/data/arena_hard_ru/model_judgment/gpt-4-1106-preview/*.zip",
