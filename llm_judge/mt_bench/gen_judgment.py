@@ -73,6 +73,7 @@ def run_judge(bench_name: str, config_path: str, dump_dir: Optional[str] = None)
     models = config["compare"]
     judge_config = config["openai"]
     judge_model = "gpt-4"
+    judge_config["model"] = judge_model
     print("Use gpt-4 as judge model")
     parallel = config["parallel"]
 

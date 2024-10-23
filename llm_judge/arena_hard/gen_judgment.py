@@ -99,6 +99,7 @@ def run_judge(bench_name: str, config_path: str, baseline: str, dump_dir: Option
     config = make_config(config_path)
     openai_config = config["openai"]
     judge_model = "gpt-4-1106-preview"
+    openai_config["model"] = judge_model
     print("Use gpt-4-1106-preview as judge model")
     parallel = config["parallel"]
 
