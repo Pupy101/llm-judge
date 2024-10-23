@@ -10,8 +10,8 @@ from llm_judge.mt_bench.common import load_yaml
 
 def display_result(bench_name: str, config_path: str, dump_dir: Optional[str] = None) -> List[dict]:
     config = load_yaml(config_path)
-    openai_config = config["openai"]
-    openai_model = openai_config["model"]
+    openai_model = "gpt-4"
+    print("Use gpt-4 as judge model")
     if dump_dir is None:
         judge_dir = f"data/{bench_name}/model_judgment"
     else:
