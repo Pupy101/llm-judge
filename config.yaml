@@ -4,9 +4,8 @@ devices:
   tpm: 10000
   need_auth: false
   params:
-    temperature: null
-    top_p: null
-    max_tokens: 1024
+    temperature: 0
+    max_tokens: 4096
     repetition_penalty: null
     profanity_check: false
   api:
