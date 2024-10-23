@@ -198,7 +198,8 @@ def display_result(
 ) -> List[dict]:
     config = make_config(config_path)
     openai_config = config["openai"]
-    judge_model = openai_config["model"]
+    judge_model = "gpt-4-1106-preview"
+    print("Use gpt-4-1106-preview as judge model")
 
     model_answers = load_model_answers(str(DATA_DIR / bench_name / "model_answer"))
     if dump_dir is None:
