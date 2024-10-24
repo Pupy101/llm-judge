@@ -53,7 +53,10 @@ def load_model_answers(answer_dir: str):
         answer = {}
         with open(filename) as fin:
             for line in fin:
-                line = json.loads(line)
+                try:
+                    line = json.loads(line)
+                except json.JSONDecodeError:
+                    print(line)
                 answer[line["question_id"]] = line  # type: ignore
         model_answers[model_name] = answer
 
