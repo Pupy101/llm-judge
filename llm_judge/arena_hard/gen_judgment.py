@@ -103,10 +103,12 @@ def run_judge(bench_name: str, config_path: str, baseline: str, dump_dir: Option
     print("Use gpt-4-1106-preview as judge model")
     parallel = config["parallel"]
 
-    if bench_name.endswith("en"):
+    if bench_name.startswith("arena_hard_"):
         assert baseline == "gpt-4-0314", baseline
-    elif bench_name.endswith("ru"):
+    elif bench_name == "ru_llm_arena":
         assert baseline == "gpt-3.5-turbo-0125", baseline
+    else:
+        raise ValueError(f"Strange bench: {bench_name}")
 
     pattern = re.compile("\[\[([AB<>=]+)\]\]")
 
