@@ -105,7 +105,7 @@ def run_judge(bench_name: str, config_path: str, baseline: str, dump_dir: Option
 
     if bench_name == "arena_hard_en":
         assert baseline == "gpt-4-0314", baseline
-    if bench_name == "arena_hard_ru":
+    elif bench_name == "arena_hard_ru":
         assert baseline == "gpt-4-0613", baseline
     elif bench_name == "ru_llm_arena":
         assert baseline == "gpt-3.5-turbo-0125", baseline
