@@ -36,8 +36,7 @@ def get_answer(question: dict, temperature: Optional[float], answer_file: str, c
         params["top_p"] = 0
         config["params"] = params
 
-    conv = [{"role": "system", "content": "You are a helpful assistant."}]
-
+    conv = []
     encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
     choices = []
     turns = []
