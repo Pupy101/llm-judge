@@ -20,7 +20,7 @@ class BaseModelAdapter:
         raise NotImplementedError
 
     def get_default_conv_template(self, model_path: str) -> Conversation:  # pylint: disable=unused-argument
-        return get_conv_template("chatgpt")
+        return get_conv_template("yandexgpt")
 
 
 model_adapters: List[BaseModelAdapter] = []
